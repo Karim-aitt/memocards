@@ -1,0 +1,12 @@
+.btn-primary{
+   background-color: var(--main-color); 
+   box-shadow: 0 5px 0 var(--main-hover);
+   border-color: var(--main-color);
+}
+
+.btn-primary:hover{
+    background-color: var(--main-color);
+    box-shadow: 0 7px 0 var(--main-hover);
+    border-color: var(--main-color);
+    filter: grayscale(40%);
+}

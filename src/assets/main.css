@@ -1,0 +1,32 @@
+@import './base.css';
+@import './bootstrap.css';
+
+
+body{
+  background-color: var(--background-dark);
+  max-width: 1204px;
+  margin: auto;
+}
+
+/* Hover */
+@media (hover: hover) {
+  li a:hover {
+    background-color: #6466fa62;
+    transition: 0.4s;
+    
+  }
+}
+
+/* Pantallas grandes */
+@media (min-width: 1024px) {
+  /* Hover */
+@media (hover: hover) {
+  li a:hover {
+    background-color: #6365f14a;
+    border-radius: 4px;
+    transition: 0.4s;
+    
+  }
+}  
+}
+
