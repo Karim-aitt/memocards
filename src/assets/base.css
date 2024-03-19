@@ -21,12 +21,16 @@
   --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
 
   --main-color: #6366F1;
+  --main-color-light: #c6c7ff;
   --main-hover: #4244a5;
+  --main-bright: #e7e7ff;
   --main-opacity: #6365f14a;
 
   --text-dark-1: #94A3B8;
   --text-light-1: #3C3C3C;
   --background-dark: #1E293B;
+  --background-dark-2: #1b2535;
+  --border-color: #94a3b867;
 }
 
 /* semantic color variables for this project */

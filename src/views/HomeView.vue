@@ -5,17 +5,35 @@ import IconInfiniteDecks from "../components/icons/IconInfiniteDecks.vue";
 import IconFree from "../components/icons/IconFree.vue"
 import IconRocket from "../components/icons/IconRocket.vue"
 
+//Vue
+import {computed} from 'vue';
+
+//Pinia store
+import { useAuthStore } from '@/stores/useAuthStore';
+
+const authStore = useAuthStore();
+const validToken = computed(() => authStore.flagToken);
+
+
+
 </script>
 
 <template>
-  <main class="container-fluid d-flex flex-column">
+  <main class=" d-flex flex-column">
     <div class="d-flex flex-column flex-lg-row mb-5">
       <div class="col text-center mb-lg-0 mb-5">
         <h2>
           Recuerda todo lo que quieras sin esfuerzo, a tu gusto.
         </h2>
   
-        <button class="btn btn-primary mt-5 mx-4 py-3 px-5">Acceder</button>
+        <button
+        v-if="!validToken"
+        class="btn btn-primary mt-5 mx-4 py-3 px-5"
+        type="button"
+        data-bs-toggle="modal"
+        data-bs-target="#registerModal"
+        >
+        Acceder</button>
   
       </div>
       <div class="col d-flex justify-content-center">
@@ -52,16 +70,18 @@ import IconRocket from "../components/icons/IconRocket.vue"
     </div>
 
   </main>
-  <hr class="my-5 py-3 border-3 text-secondary"/>
+  <hr class="my-5 py-3 border-2 text-secondary separator"/>
 
   <div class="d-flex justify-content-center text-center">
     <h2 class="me-3">Tarjetas de memoria <br> más rápidas, más fáciles </h2>
     <IconRocket style="width: 4rem; height: 4rem; color: var(--main-color);" />
   </div>
+
+
 </template>
 
 <style scoped>
 
 
-
 </style>
+

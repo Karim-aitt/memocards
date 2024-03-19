@@ -20,18 +20,44 @@ const router = createRouter({
     {
       path: '/categorias',
       name: 'categorias',
-      component: () => import('../views/CategoryView.vue')
+      component: () => import('../views/CategoryView.vue'),
+      // children: [
+      //   {
+      //     path: '/comunidad'
+      //     component: 'C'
+      //   }
+      // ]
     },
     {
       path: '/mazos',
-      name: 'mazos',
+      name: 'Mazos',
+      component: () => import('../views/DecksView.vue')
+    },
+    {
+      path: '/mazos/:categoryId/:categoryName',
+      name: 'Mazo',
       component: () => import('../views/DecksView.vue')
     },
     {
       path: '/user',
       name: 'user',
       component: () => import('../views/UserView.vue')
-    }
+    },
+    {
+      path: '/cards',
+      name: 'cartas',
+      component: () => import('../views/CardsView.vue')
+    },
+    {
+      path: '/cards/:deckId/:deckName',
+      name: 'carta',
+      component: () => import('../views/CardsView.vue')
+    },
+    // {
+    //   path: '/register',
+    //   name: 'Register',
+    //   component: () => import('../components/Register.vue')
+    // },
 
   ]
 })
