@@ -1,27 +1,44 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter, useRoute, RouterLink } from 'vue-router'
-import { useAuthStore } from '@/stores/useAuthStore';
-import { useUserStore } from '@/stores/useUserStore';
-import { useDeckStore } from '@/stores/useDeckStore';
 
+//Componentes
+import AddComponent from '@/components/AddComponent.vue';
+import UpdateComponent from '@/components/UpdateComponent.vue';
+//Iconos
 import IconDeck from '@/components/icons/IconDeck.vue';
 import IconDelete from '@/components/icons/IconDelete.vue';
 import IconPencil from '@/components/icons/IconPencil.vue';
-
+//Stores
+import { useAuthStore } from '@/stores/useAuthStore';
+import { useUserStore } from '@/stores/useUserStore';
+import { useDeckStore } from '@/stores/useDeckStore';
+import { useFlagStore } from '@/stores/useFlagStore';
+//Referencia de stores
 const deckStore = useDeckStore();
 const authStore = useAuthStore();
 const userStore = useUserStore();
+const flagStore = useFlagStore();
 
 const validToken = computed(() => authStore.flagToken);
 const userId = computed(() => userStore.userIdRef)
 
+const flagDeck = computed(() => flagStore.flagDeck);
+
+watch(flagDeck, () => {
+    fetchAllDecks()
+});
+
+
+
+//Obtencion de valores de la url
 const route = useRoute();
 const categoryId = route.params.categoryId || null;
 const categoryName = ref(route.params.categoryName || null);
 
 const decks = ref([])
 const flagSpinner = ref(true);
+
 
 async function fetchDecksFromCategory() {
 
@@ -49,7 +66,7 @@ async function fetchAllDecks() {
             throw new Error('Error en fetch Mazos')
         }
         decks.value = await response.json();
-        
+
         flagSpinner.value = false;
 
     } catch (error) {
@@ -97,6 +114,60 @@ const router = useRouter();
 function goBack() {
     router.go(-1);
 }
+//Valor para pasar mediante props a UpdateDeckComp
+const elementId = ref(0)
+function updateElementId(newId) {
+    elementId.value = newId;
+}
+
+//Flag para error
+const alertErrorFlag = ref(false);
+const alertErrorText = ref('');
+const alertErrorClass = ref("alert alert-success")
+
+const idDeleteElement = ref()
+
+function setDeleteElement(id) {
+    idDeleteElement.value = id
+}
+
+async function deleteElement() {
+    const id = idDeleteElement.value
+    try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}decks/${id}`, {
+            method: 'DELETE',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + userStore.userToken
+            }
+        })
+
+        if (!response.ok) {
+            alertErrorClass.value = "alert alert-danger"
+            alertErrorText.value = 'Error al eliminar el mazo';
+            alertErrorFlag.value = true;
+            throw new Error('Error response is not ok');
+        } else {
+            alertErrorClass.value = "alert alert-success"
+            alertErrorText.value = 'Mazo eliminado con éxito';
+            alertErrorFlag.value = true;
+            fetchUserDecks()
+
+            setTimeout(() => {
+                alertErrorFlag.value = false;
+            }, 1000)
+        }
+    } catch (error) {
+        console.error("Error al borrar la carta", error);
+    }
+}
+
+function setDeckValues(deckId, created_by_user_id){
+    deckStore.setSelectedDeckId(deckId);
+    console.log(created_by_user_id, "created");
+    deckStore.setSelectedDeckIdCreator(created_by_user_id);
+}
 
 </script>
 
@@ -116,6 +187,9 @@ function goBack() {
                         <li v-if="validToken" class="nav-item">
                             <button class="nav-link text-link rounded-4 ms-2" @click="fetchUserDecks">Creados</button>
                         </li>
+                        <li class="nav-item">
+                            <button @click="goBack" class="goBackButton nav-link">Volver</button>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -125,30 +199,55 @@ function goBack() {
                 </div>
             </div>
         </div>
-
-
-        <button @click="goBack" class="goBackButton nav-link me-auto ms-1 mt-2">Volver</button>
     </div>
+
+    <div v-if="validToken" class="d-flex justify-content-start container-fluid my-2">
+        <AddComponent pageName="Mazo" formComponent="AddDeckComp" />
+    </div>
+
     <div class="container-fluid mt-5">
 
         <div v-if="flagSpinner" class="spinner-border mx-auto fs-2" role="status">
             <span class="visually-hidden">Loading...</span>
         </div>
 
+<!-- FOR RENDER -->
         <div v-else class="d-flex justify-content-between flex-wrap">
-            <div v-for="deck in decks" :key="deck.id" class="d-flex border border-2 border-secondary rounded align-items-center p-4 my-3 widthCategory">
-                
+            <div v-for="deck in decks" :key="deck.id"
+                class="d-flex border border-2 border-secondary rounded align-items-center p-4 my-3 widthCategory">
+
                 <IconDeck style="width: 2rem; height: 2rem; color: var(--main-color)" />
-                <RouterLink :to="`/cards/${deck.id}/${deck.name}`" @click="deckStore.setSelectedDeckId(deck.id)"
-                    class="ms-4 text-decoration-none deckName ">
-                    {{ deck.name }}</RouterLink>
+
+                <div class="d-flex flex-column">
+
+                    <RouterLink :to="`/cards/${deck.id}/${deck.name}`" @click="setDeckValues(deck.id, deck.created_by_user_id)"
+                        class="ms-4 text-decoration-none deckName ">
+                        {{ deck.name }}</RouterLink>
+
+                    <div class="ms-4 tagDiv">
+                        <span class="" v-for="tag in deck.tag_names">{{ tag }}</span>
+                    </div>
+
+                </div>
+
+
 
                 <div v-if="userId === deck.created_by_user_id" class="ms-auto me-3">
-                    <IconPencil class="me-3 iconLink" style="width: 2rem; height: 2rem; color: var(--main-dark-1)" />
-                    <IconDelete class="iconLink" style="width: 2rem; height: 2rem; color: var(--main-dark-1)" />
+                    <IconPencil @click="updateElementId(deck.id)" data-bs-toggle="modal" data-bs-target="#updateModal"
+                        class="me-3 iconLink" style="width: 2rem; height: 2rem; color: var(--main-dark-1)" />
+
+                    <UpdateComponent pageName="Mazo" formComponent="UpdateDeckComp" :elementId="elementId" />
+
+                    <IconDelete @click="() => setDeleteElement(deck.id)" data-bs-toggle="modal"
+                        data-bs-target="#deleteModal" class="iconLink"
+                        style="width: 2rem; height: 2rem; color: var(--main-dark-1)" />
                 </div>
 
             </div>
+        </div>
+
+        <div v-if="alertErrorFlag" :class="alertErrorClass" role="alert">
+            {{ alertErrorText }}
         </div>
 
         <div v-if="!decks.length > 0 && !flagSpinner">
@@ -156,11 +255,36 @@ function goBack() {
         </div>
 
     </div>
+
+    <!-- DELETE MODAL -->
+    <!-- Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body d-flex flex-column py-5">
+                    <p class="mx-auto">
+                        ¿Desea eliminar el elemento para siempre?
+
+                    </p>
+                    <div class="d-flex justify-content-evenly">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                        <button @click="() => deleteElement()" type="button" class="btn btn-danger"
+                            data-bs-dismiss="modal">Eliminar</button>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </template>
 
 <style scoped>
 h1 {
     color: var(--main-color);
+}
+
+.tagDiv span:not(:first-child){
+    margin-left: 7px;
 }
 
 .widthCategory {

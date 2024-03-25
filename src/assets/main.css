@@ -47,7 +47,7 @@ body{
 
 /* Button Volver atrás */
 .goBackButton{
-
+  color: var(--text-dark-1);
 }
 .goBackButton:hover{
   color: var(--main-color);
@@ -95,3 +95,4 @@ h3 span{
   border: 2px solid rgb(186, 248, 186);
   font-weight: 600;
 }
+

@@ -1,20 +1,22 @@
 <script setup>
 
 import AddCategoryComp from './AddCategoryComp.vue';
+import AddDeckComp from './AddDeckComp.vue';
+import AddCardComp from './AddCardComp.vue';
 
 const props = defineProps({
     pageName: String,
-    formComponent: String,
+    formComponent: String
 })
-
-console.log(props.formComponent)
 
 </script>
 
 
 <template>
 
-    <button data-bs-toggle="modal" data-bs-target="#addModal">+</button>
+    
+    <button class="btn btn-primary fs-2 py-0" data-bs-toggle="modal" data-bs-target="#addModal"> + </button>
+    
 
     <!-- MODAL -->
     <div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
@@ -30,9 +32,11 @@ console.log(props.formComponent)
 
                 <!-- BODY -->
                 <div class="modal-body">
-                    
+                   
                     
                     <AddCategoryComp v-if="props.formComponent === 'AddCategoryComp'"/>
+                    <AddDeckComp v-if="props.formComponent === 'AddDeckComp'" />
+                    <AddCardComp v-if="props.formComponent === 'AddCardComp'" />
 
                 </div>
             </div>
@@ -40,4 +44,6 @@ console.log(props.formComponent)
     </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+
+</style>

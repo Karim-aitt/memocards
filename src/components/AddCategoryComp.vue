@@ -1,6 +1,5 @@
 <script setup>
 import { ref } from 'vue'
-import { checkPassword, checkEmail } from '../services/registerServices.js'
 
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useUserStore } from '@/stores/useUserStore';
@@ -8,6 +7,7 @@ import { useFlagStore } from '@/stores/useFlagStore';
 
 const authStore = useAuthStore();
 const flagStore = useFlagStore();
+const userStore = useUserStore();
 
 const categoryName = ref('');
 const toggleError = ref(false);
@@ -24,7 +24,7 @@ async function addCategory(e) {
             mode: 'cors',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + authStore.token
+                'Authorization': 'Bearer ' + userStore.userToken
             },
             body: JSON.stringify(data)
         })

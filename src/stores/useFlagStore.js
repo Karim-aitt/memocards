@@ -1,7 +1,5 @@
 import {
-    ref,
-    computed,
-    watch
+    ref
 } from 'vue'
 import {
     defineStore
@@ -10,12 +8,27 @@ import {
 export const useFlagStore = defineStore('flag', () => {
 
     const flagCategory = ref(false);
+    const flagDeck = ref(false);
+    const flagCard = ref(false);
 
-    function toggleFlagCategory(){
-        console.log("toggle 1", flagCategory.value)
+    function toggleFlagCategory() {
         flagCategory.value = !flagCategory.value;
-        console.log("toggle 2", flagCategory.value)
     }
 
-    return {toggleFlagCategory, flagCategory};
+    function toggleFlagDeck() {
+        flagDeck.value = !flagDeck.value;
+    }
+
+    function toggleFlagCard() {
+        flagCard.value = !flagCard.value;
+    }
+
+    return {
+        toggleFlagCategory,
+        flagCategory,
+        flagDeck,
+        flagCard,
+        toggleFlagDeck,
+        toggleFlagCard
+    };
 })

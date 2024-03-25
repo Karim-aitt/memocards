@@ -14,6 +14,7 @@ export const useDeckStore = defineStore('deck', () => {
     const selectedCategoryId = ref(null);
     const selectedDeckName = ref('');
     const selectedDeckId = ref(null);
+    const selectedDeckIdCreator = ref(null);
 
     function setSelectedCategoryName(name) {
         selectedCategoryName.value = name;
@@ -30,6 +31,10 @@ export const useDeckStore = defineStore('deck', () => {
     function setSelectedDeckId(id) {
         selectedDeckId.value = id;
     }
+    function setSelectedDeckIdCreator(id){
+        console.log('selected', id)
+        selectedDeckIdCreator.value = id;
+    }
 
     function getSelectedCategoryName(){
         return selectedCategoryName.value;
@@ -43,6 +48,9 @@ export const useDeckStore = defineStore('deck', () => {
     function getSelectedDeckId(){
         return selectedDeckId.value;
     }
+    function getSelectedDeckIdCreator(){
+        return selectedDeckIdCreator.value;
+    }
 
 
     return {
@@ -50,9 +58,11 @@ export const useDeckStore = defineStore('deck', () => {
         setSelectedCategoryId,
         setSelectedDeckName,
         setSelectedDeckId,
+        setSelectedDeckIdCreator,
         getSelectedCategoryId,
         getSelectedCategoryName,
         getSelectedDeckId,
-        getSelectedDeckName
+        getSelectedDeckName,
+        getSelectedDeckIdCreator
     };
 })
