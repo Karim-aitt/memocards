@@ -12,7 +12,7 @@ const isMobile = ref(false)
 </script>
 
 <template>
-  <div v-if="route.path == '/'">
+  <div v-if="route.path == '/' || route.path == '/about'">
 
     <header>
       <NavBar />

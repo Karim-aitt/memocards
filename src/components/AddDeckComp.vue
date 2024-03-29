@@ -36,10 +36,10 @@ async function addDeck(e) {
     try {
         if (categoryNameRoute.value !== null) {
             data.value = { deckName: deckName.value, categoryName: categoryNameRoute.value, tags: tags.value }
-            console.log("if",data.value)
+            
         } else {
             data.value = { deckName: deckName.value, categoryName: categoryNameSelect.value, tags: tags.value }
-            console.log("else",data.value)
+            
         }
 
         const response = await fetch(`${import.meta.env.VITE_API_URL}decks/add`, {

@@ -57,10 +57,10 @@ const isMobile = false;
             <RouterLink to="/mazos" class="nav-link" href="#">Mazos</RouterLink>
           </li>
           <li class="nav-item">
-            <RouterLink to="/about" class="nav-link">Contacto</RouterLink>
+            <RouterLink to="/about" class="nav-link">Sobre nosotros</RouterLink>
           </li>
           <li v-if="validToken" class="nav-item">
-            <RouterLink to="/about" class="nav-link username">{{ userStore.usernameRef }}</RouterLink>
+            <RouterLink to="/user" class="nav-link username">{{ userStore.usernameRef }}</RouterLink>
           </li>
         </ul>
       </div>
@@ -171,13 +171,7 @@ a:hover {
 a:focus {
   color: var(--text-dark-1);
 }
-.username{
-  color: var(--main-color);
-}
-.username:hover{
-  color: var(--main-bright) !important;
-  background-color: var(--main-color);
-}
+
 
 .navlink{
   color: var(--text-dark-1);

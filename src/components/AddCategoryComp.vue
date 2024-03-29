@@ -35,7 +35,7 @@ async function addCategory(e) {
         }
 
         const { category } = await response.json();
-        console.log("categoria", category)
+        
 
         if (category) {
             flagAlert.value = true;

@@ -20,23 +20,66 @@ const authStore = useAuthStore();
 const userStore = useUserStore();
 const flagStore = useFlagStore();
 
+//Array de mazos
+const decks = ref([]);
+
+//Search functionality
+const inputSearch = ref('');
+
+//Para filtrar mazos
+const filteredDecks = computed(() => {
+    const searchQuery = inputSearch.value.toLowerCase();
+    return decks.value.filter(deck =>
+        (deck.name || "").toLowerCase().includes(searchQuery) ||
+        deck.tag_names.some(tag => (tag || "").toLowerCase().includes(searchQuery))
+    );
+});
+
+function filterByTag(tag) {
+    inputSearch.value = tag;
+}
+
+
+import { convertString } from '@/services/viewServices';
+
 const validToken = computed(() => authStore.flagToken);
 const userId = computed(() => userStore.userIdRef)
+const creatorId = deckStore.getSelectedDeckIdCreator() || null;
+const categoryCreatorId = deckStore.getSelectedCategoryCreatorId() || null;
+
+//Si es el creador de la categoria, muestra el boton de añadir cartas
+const flagCreator = ref(false);
 
 const flagDeck = computed(() => flagStore.flagDeck);
 
 watch(flagDeck, () => {
-    fetchAllDecks()
+    flagSpinner.value = true
+
+    if (categoryId) {
+        if (categoryCreatorId === userId.value) {
+
+            flagCreator.value = true;
+        } else {
+
+            flagCreator.value = false;
+        }
+
+        setTimeout(() => {
+            fetchDecksFromCategory()
+        }, 500)
+    } else {
+        setTimeout(() => {
+            fetchAllDecks()
+        }, 500)
+    }
 });
-
-
 
 //Obtencion de valores de la url
 const route = useRoute();
 const categoryId = route.params.categoryId || null;
 const categoryName = ref(route.params.categoryName || null);
 
-const decks = ref([])
+//Flag del spinner
 const flagSpinner = ref(true);
 
 
@@ -66,7 +109,6 @@ async function fetchAllDecks() {
             throw new Error('Error en fetch Mazos')
         }
         decks.value = await response.json();
-
         flagSpinner.value = false;
 
     } catch (error) {
@@ -97,14 +139,24 @@ async function fetchUserDecks() {
 }
 
 onMounted(() => {
+
     flagSpinner.value = true
 
     if (categoryId) {
+        if (categoryCreatorId === userId.value) {
+            
+            flagCreator.value = true;
+        } else {
+            
+            flagCreator.value = false;
+        }
+
         setTimeout(() => {
             fetchDecksFromCategory()
         }, 500)
     } else {
         setTimeout(() => {
+            flagCreator.value = true;
             fetchAllDecks()
         }, 500)
     }
@@ -130,7 +182,6 @@ const idDeleteElement = ref()
 function setDeleteElement(id) {
     idDeleteElement.value = id
 }
-
 async function deleteElement() {
     const id = idDeleteElement.value
     try {
@@ -152,7 +203,25 @@ async function deleteElement() {
             alertErrorClass.value = "alert alert-success"
             alertErrorText.value = 'Mazo eliminado con éxito';
             alertErrorFlag.value = true;
-            fetchUserDecks()
+            flagSpinner.value = true
+
+            if (categoryId) {
+                if (categoryCreatorId === userId.value) {
+                    
+                    flagCreator.value = true;
+                } else {
+                    
+                    flagCreator.value = false;
+                }
+
+                setTimeout(() => {
+                    fetchDecksFromCategory()
+                }, 500)
+            } else {
+                setTimeout(() => {
+                    fetchAllDecks()
+                }, 500)
+            }
 
             setTimeout(() => {
                 alertErrorFlag.value = false;
@@ -163,9 +232,8 @@ async function deleteElement() {
     }
 }
 
-function setDeckValues(deckId, created_by_user_id){
+function setDeckValues(deckId, created_by_user_id) {
     deckStore.setSelectedDeckId(deckId);
-    console.log(created_by_user_id, "created");
     deckStore.setSelectedDeckIdCreator(created_by_user_id);
 }
 
@@ -194,14 +262,17 @@ function setDeckValues(deckId, created_by_user_id){
                 </div>
             </div>
             <div class="col-lg-4">
+                <!-- BUSCADOR -->
                 <div class="d-lg-flex justify-content-end">
-                    <input class="form-control w-75" type="text" placeholder="Nombre/etiquetas..." />
+                    <input v-model="inputSearch" class="form-control w-75 inputSearch" type="text"
+                        placeholder="Nombre/etiquetas..." />
                 </div>
+
             </div>
         </div>
     </div>
 
-    <div v-if="validToken" class="d-flex justify-content-start container-fluid my-2">
+    <div v-if="validToken && flagCreator" class="d-flex justify-content-start container-fluid my-2">
         <AddComponent pageName="Mazo" formComponent="AddDeckComp" />
     </div>
 
@@ -210,29 +281,36 @@ function setDeckValues(deckId, created_by_user_id){
         <div v-if="flagSpinner" class="spinner-border mx-auto fs-2" role="status">
             <span class="visually-hidden">Loading...</span>
         </div>
+        <!-- Contenido mostrado cuando no hay mazos que coincidan con la búsqueda y se ha ingresado algo en el buscador -->
+        <div v-if="filteredDecks.length === 0 && inputSearch.length > 0" class="alert alert-warning" role="alert">
+            No se han encontrado coincidencias.
+        </div>
 
-<!-- FOR RENDER -->
+        <!-- FOR RENDER -->
         <div v-else class="d-flex justify-content-between flex-wrap">
-            <div v-for="deck in decks" :key="deck.id"
-                class="d-flex border border-2 border-secondary rounded align-items-center p-4 my-3 widthCategory">
+            <div v-for="deck in filteredDecks" :key="deck.id" class="cardBox">
 
                 <IconDeck style="width: 2rem; height: 2rem; color: var(--main-color)" />
-
+                <strong class="mx-3">{{ deck.category_name }}</strong>
                 <div class="d-flex flex-column">
 
-                    <RouterLink :to="`/cards/${deck.id}/${deck.name}`" @click="setDeckValues(deck.id, deck.created_by_user_id)"
-                        class="ms-4 text-decoration-none deckName ">
-                        {{ deck.name }}</RouterLink>
 
-                    <div class="ms-4 tagDiv">
-                        <span class="" v-for="tag in deck.tag_names">{{ tag }}</span>
+
+                    <RouterLink :to="`/cards/${deck.id}/${deck.name}`"
+                        @click="setDeckValues(deck.id, deck.created_by_user_id)"
+                        class="ms-2 text-decoration-none deckName ">
+                        {{ convertString(deck.name) }}
+                    </RouterLink>
+
+                    <div class="ms-2 tagDiv">
+                        <span v-for="tag in deck.tag_names" @click="filterByTag(tag)" style="cursor: pointer">{{ tag }}</span>
                     </div>
 
                 </div>
 
 
 
-                <div v-if="userId === deck.created_by_user_id" class="ms-auto me-3">
+                <div v-if="userId === deck.created_by_user_id" class="ms-auto">
                     <IconPencil @click="updateElementId(deck.id)" data-bs-toggle="modal" data-bs-target="#updateModal"
                         class="me-3 iconLink" style="width: 2rem; height: 2rem; color: var(--main-dark-1)" />
 
@@ -283,7 +361,7 @@ h1 {
     color: var(--main-color);
 }
 
-.tagDiv span:not(:first-child){
+.tagDiv span:not(:first-child) {
     margin-left: 7px;
 }
 
@@ -307,7 +385,7 @@ h1 {
 }
 
 .deckName {
-    color: var(--text-dark-1);
+    color: var(--secondary-color);
 }
 
 .deckName:hover {

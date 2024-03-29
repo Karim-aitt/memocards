@@ -99,10 +99,10 @@ async function fetchDeckCards() {
 onMounted(() => {
 
     if (creatorId === userId.value) {
-        console.log("if")
+        
         flagCreator.value = true;
     } else {
-        console.log("else")
+        
         flagCreator.value = false;
     }
 
@@ -125,8 +125,8 @@ function updateElementId(newId, card) {
     elementId.value = newId;
     elementValues.value = card
 }
-const idDeleteElement = ref()
 
+const idDeleteElement = ref()
 function setDeleteElement(id) {
     idDeleteElement.value = id
 }
@@ -205,8 +205,7 @@ async function deleteElement() {
         </div>
 
         <div v-else class="d-flex justify-content-between flex-wrap">
-            <div v-for="card in cards" :key="card.id" class="
-                d-flex border border-2 border-secondary rounded align-items-center p-4 my-3 widthCategory">
+            <div v-for="card in cards" :key="card.id" class="cardBox ">
 
                 <IconCard style="width: 2rem; height: 2rem; color: var(--main-color)" />
 
@@ -287,7 +286,5 @@ h1 {
     color: var(--main-color);
 }
 
-.cardName {
-    color: var(--text-dark-1);
-}
+
 </style>

@@ -19,20 +19,60 @@ const deckStore = useDeckStore();
 const userStore = useUserStore();
 const flagStore = useFlagStore();
 
+import { convertString } from '@/services/viewServices';
+
+
+const currentPage = ref(1);
+const totalPages = ref(0);
+
+async function fetchCategories(page = 1) {
+    try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}category?page=${page}`);
+        if (!response.ok) {
+            throw new Error('Error en fetch categories');
+        }
+        const data = await response.json();
+        categories.value = data.categories; // Asume que la respuesta tiene esta estructura
+        totalPages.value = data.totalPages; // Asume que la respuesta incluye el total de páginas
+        currentPage.value = page;
+    } catch (error) {
+        console.error("Error al obtener categorias", error);
+    }
+}
+
+
 const flagCategory = computed(() => flagStore.flagCategory);
 
 watch(flagCategory, () => {
-    fetchCategories()
+    fetchAllCategories()
 });
+
+//Search functionality
+const inputSearch = ref('');
+
+// Método computado para filtrar los mazos basado en el input del usuario
+const filteredCategories = computed(() => {
+  // Convertir el texto de búsqueda a minúsculas para una comparación insensible a mayúsculas/minúsculas
+  const searchQuery = inputSearch.value.toLowerCase();
+
+  // Filtrar los mazos si el nombre incluye el texto de búsqueda
+  // o alguna de las etiquetas incluye el texto de búsqueda
+    return categories.value.filter(category => 
+    category.name.toLowerCase().includes(searchQuery)
+    );
+});
+
 
 
 const validToken = computed(() => authStore.flagToken);
 const userId = computed(() => userStore.userIdRef);
 
+// Array con las categorias
 const categories = ref([])
 const flagSpinner = ref(true);
 
-async function fetchCategories() {
+async function fetchAllCategories(id) {
+    const lastCategoryId = id;
 
     try {
         
@@ -41,12 +81,11 @@ async function fetchCategories() {
             throw new Error('Error en fetch categories')
         }
         categories.value = await response.json();
-
         //Para quitar el spinner después de 1 segundo
         setTimeout(() => {
             flagSpinner.value = false;
 
-        }, 1000);
+        }, 500);
 
     } catch (error) {
         flagSpinner.value = false;
@@ -82,7 +121,7 @@ async function fetchUserCategories() {
 onMounted(() => {
     flagSpinner.value = true
     setTimeout(() => {
-        fetchCategories();
+        fetchAllCategories();
 
     }, 200)
 })
@@ -137,6 +176,12 @@ async function deleteElement(){
     }
 }
 
+//Se setean los valores de la categoria para constractarlos en decksview
+function setSelectedCategoryValues(id, creatorId){
+    deckStore.setSelectedCategoryId(id)
+    deckStore.setSelectedCategoryCreatorId(creatorId)
+}
+
 </script>
 
 <template>
@@ -149,7 +194,7 @@ async function deleteElement(){
                 <div class="d-lg-flex">
                     <ul class="nav flex-lg-row ">
                         <li class="nav-item ">
-                            <button class="nav-link active text-link rounded-4" @click="fetchCategories">Comunidad</button>
+                            <button class="nav-link active text-link rounded-4" @click="fetchAllCategories">Comunidad</button>
                         </li>
                         <li v-if="validToken" class="nav-item">
                             <button class="nav-link text-link rounded-4 ms-2" @click="fetchUserCategories">Creadas</button>
@@ -159,7 +204,7 @@ async function deleteElement(){
             </div>
             <div class="col-lg-4">
                 <div class="d-lg-flex justify-content-end">
-                    <input class="form-control w-75" type="text" placeholder="Nombre categoria..." />
+                    <input v-model="inputSearch" class="form-control w-75 inputSearch" type="text" placeholder="Nombre categoria..." />
                 </div>
             </div>
         </div>
@@ -172,26 +217,33 @@ async function deleteElement(){
 
     <div class="container-fluid mt-4">
 
+        
+
+        <!-- Contenido mostrado cuando no hay mazos que coincidan con la búsqueda y se ha ingresado algo en el buscador -->
+        <div v-if="filteredCategories.length === 0 && inputSearch.length > 0" class="alert alert-warning" role="alert">
+            No se han encontrado coincidencias.
+        </div>
+
         <div v-if="flagSpinner" class="spinner-border mx-auto fs-2 mt-3" role="status">
             <span class="visually-hidden">Loading...</span>
         </div>
 
         <div v-else class="d-flex justify-content-between flex-wrap">
 
-            <div v-for="category in categories"
+            <div v-for="category in filteredCategories"
             :category="category"
             @updateElementId="updateElementId"
             :key="category.id"
-            class="d-flex border border-2 border-secondary rounded align-items-center p-4 my-3 widthCategory">
+            class="cardBox">
 
                 <IconCategory style="width: 2rem; height: 2rem; color: var(--main-color)"/>
 
-                <RouterLink :to="`/mazos/${category.id}/${category.name}`" @click="deckStore.setSelectedCategoryId(category.id)" 
-                class="ms-4 text-decoration-none categoryName">{{ category.name }}</RouterLink>
+                <RouterLink :to="`/mazos/${category.id}/${category.name}`" @click="setSelectedCategoryValues(category.id, category.created_by_user_id)" 
+                class="ms-4 text-decoration-none categoryName">{{ convertString(category.name) }}</RouterLink>
 
 
 
-                <div v-if="userId === category.created_by_user_id" class="ms-auto me-3">
+                <div v-if="userId === category.created_by_user_id" class="ms-auto ">
                     <IconPencil
                         @click="updateElementId(category.id)"
                         data-bs-toggle="modal" 
@@ -215,6 +267,12 @@ async function deleteElement(){
             {{ alertErrorText }}
         </div>
 
+    </div>
+
+    <div class="pagination-buttons">
+        <button v-if="currentPage > 1" @click="fetchCategories(currentPage - 1)">Anterior</button>
+        <button v-for="page in totalPages" :key="page" @click="fetchCategories(page)">{{ page }}</button>
+        <button v-if="currentPage < totalPages" @click="fetchCategories(currentPage + 1)">Siguiente</button>
     </div>
 
     <!-- DELETE MODAL -->

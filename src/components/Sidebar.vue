@@ -49,8 +49,9 @@ function logout() {
     </ul>
     
     <hr class="my-4 border border-1 bg-secondary separator">
-    <RouterLink v-if="validToken" to="/about" class="nav-link username fs-3 mx-auto mb-3 px-3">{{ userStore.usernameRef
-      }}</RouterLink>
+    <RouterLink v-if="validToken" to="/user" class="nav-link username fs-3 mx-auto mb-3 px-3">
+    {{ userStore.usernameRef}}
+  </RouterLink>
 
 
     <button v-if="validToken" class="btn btn-primary mx-2" @click="logout">Salir</button>
@@ -140,16 +141,6 @@ a:hover {
 
 a:focus {
   color: var(--text-dark-1);
-}
-
-.username {
-  color: var(--main-color);
-}
-
-.username:hover {
-  color: var(--main-bright) !important;
-  background-color: var(--text-light-1);
-  border-radius: 5px;
 }
 
 /* MODAL CLASSES */

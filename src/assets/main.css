@@ -65,9 +65,6 @@ h3 span{
   cursor: pointer;
 }
 
-
-/* MODAL */
-
 /* MODAL CLASSES */
 
 .modal-content{
@@ -96,3 +93,53 @@ h3 span{
   font-weight: 600;
 }
 
+/* Card classes */
+
+.cardBox{
+  display: flex;
+  width: 48%;
+  height: 100px;
+  border-radius: 10px;
+  align-items: center;
+  padding: 20px;
+  margin: 20px 0px;
+  color: var(--text-dark-1);
+  border: 2px solid var(--border-color);
+  background-color: rgba(145, 145, 145, 0.13);
+  /* box-shadow: 5px 5px 5px var(--main-color-light); */
+
+}
+
+/* Input del buscador inputSearch */
+
+.form-control.inputSearch {
+  color: var(--text-dark-1);
+  border: 2px solid var(--main-color);
+  background-color: var(--background-dark);
+}
+
+.form-control.inputSearch::placeholder {
+  color: var(--text-dark-1);
+}
+
+/* Asegúrate de que este estilo se aplique solo cuando tu input específico está enfocado */
+.form-control.inputSearch:focus {
+  border: 2px solid var(--main-color) !important;
+  background-color: var(--background-dark) !important;
+  color: var(--text-dark-1);
+  box-shadow: 0px 0px 5px var(--secondary-color);
+}
+
+.form-control:focus{
+  box-shadow: 0px 0px 5px var(--main-color);
+}
+
+/* Colores en username */
+.username{
+  color: var(--main-color);
+}
+.username:hover{
+  color: var(--main-bright) !important;
+  background-color: var(--main-color);
+  border-radius: 5px;
+}
