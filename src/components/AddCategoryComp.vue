@@ -43,11 +43,11 @@ async function addCategory(e) {
             flagStore.toggleFlagCategory();
 
             // Cerrar el modal directamente
-            setTimeout(() => {
-                const addModal = bootstrap.Modal.getInstance(document.getElementById('addModal'));
-                addModal.hide();
-                flagAlert.value = false;
-            }, 2000)
+            // setTimeout(() => {
+            //     const addModal = bootstrap.Modal.getInstance(document.getElementById('addModal'));
+            //     addModal.hide();
+            //     flagAlert.value = false;
+            // }, 2000)
 
 
         } else {

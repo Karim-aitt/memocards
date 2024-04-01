@@ -156,7 +156,7 @@ watch(() => route.path, (newPath) => {
             </div>
 
             <div v-if="flagAlert" class="alert alertSuccessColors mt-4 text-center w-75 mx-auto p-4 m-4" role="alert">
-                Mazo añadida correctamente.
+                Mazo añadido correctamente.
             </div>
 
         </form>

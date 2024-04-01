@@ -52,7 +52,7 @@ async function updateCard(e) {
             inputFrontText.value = '';
             inputBackText.value = '';
 
-            // Cerrar el modal directamente
+            // // Cerrar el modal directamente
             setTimeout(() => {
                 const updateModal = bootstrap.Modal.getInstance(document.getElementById('updateModal'));
                 updateModal.hide();

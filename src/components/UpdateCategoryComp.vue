@@ -52,14 +52,13 @@ async function updateCategory(e){
         } else {
             flagAlert.value = true;
             newCategoryName.value = '';
-            flagStore.toggleFlagCategory();
-
-            // Cerrar el modal directamente
+            const updateModal = bootstrap.Modal.getInstance(document.getElementById('updateModal'));
+            // // Cerrar el modal directamente
             setTimeout(() => {
-                const updateModal = bootstrap.Modal.getInstance(document.getElementById('updateModal'));
                 updateModal.hide();
                 flagAlert.value = false;
-            }, 2000)
+                flagStore.toggleFlagCategory();
+            }, 1300)
         }
         
     } catch (error) {

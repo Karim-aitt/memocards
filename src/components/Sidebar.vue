@@ -43,7 +43,7 @@ function logout() {
         <RouterLink to="/mazos" class="nav-link" href="#">Mazos</RouterLink>
       </li>
       <li class="nav-item">
-        <RouterLink to="/about" class="nav-link">Contacto</RouterLink>
+        <RouterLink to="/about" class="nav-link">Sobre nosotros</RouterLink>
       </li>
 
     </ul>

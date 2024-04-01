@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted, computed, watch, onUnmounted } from 'vue';
 import { RouterView, useRoute, RouterLink } from 'vue-router'
 
 import AddComponent from '@/components/AddComponent.vue';
@@ -22,48 +22,6 @@ const flagStore = useFlagStore();
 import { convertString } from '@/services/viewServices';
 
 
-const currentPage = ref(1);
-const totalPages = ref(0);
-
-async function fetchCategories(page = 1) {
-    try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}category?page=${page}`);
-        if (!response.ok) {
-            throw new Error('Error en fetch categories');
-        }
-        const data = await response.json();
-        categories.value = data.categories; // Asume que la respuesta tiene esta estructura
-        totalPages.value = data.totalPages; // Asume que la respuesta incluye el total de páginas
-        currentPage.value = page;
-    } catch (error) {
-        console.error("Error al obtener categorias", error);
-    }
-}
-
-
-const flagCategory = computed(() => flagStore.flagCategory);
-
-watch(flagCategory, () => {
-    fetchAllCategories()
-});
-
-//Search functionality
-const inputSearch = ref('');
-
-// Método computado para filtrar los mazos basado en el input del usuario
-const filteredCategories = computed(() => {
-  // Convertir el texto de búsqueda a minúsculas para una comparación insensible a mayúsculas/minúsculas
-  const searchQuery = inputSearch.value.toLowerCase();
-
-  // Filtrar los mazos si el nombre incluye el texto de búsqueda
-  // o alguna de las etiquetas incluye el texto de búsqueda
-    return categories.value.filter(category => 
-    category.name.toLowerCase().includes(searchQuery)
-    );
-});
-
-
-
 const validToken = computed(() => authStore.flagToken);
 const userId = computed(() => userStore.userIdRef);
 
@@ -71,33 +29,106 @@ const userId = computed(() => userStore.userIdRef);
 const categories = ref([])
 const flagSpinner = ref(true);
 
-async function fetchAllCategories(id) {
-    const lastCategoryId = id;
+const page = ref(1);
+const isLoading = ref(false);
+const allCategoriesLoaded = ref(false);
 
+const viewType = ref('comunidad');
+
+// Modificamos fetchCategories para resetear estados al cambiar entre vistas
+const resetStatesBeforeFetch = () => {
+  page.value = 1;
+  categories.value = [];
+  allCategoriesLoaded.value = false;
+  flagSpinner.value = true;
+};
+
+// function loadMoreCategories(){
+//     fetchCategories();
+// }
+
+const flagCategory = computed(() => flagStore.flagCategory);
+watch(flagCategory, () => {
+    resetStatesBeforeFetch()
+    fetchUserCategories();
+});
+
+//Search functionality
+const inputSearch = ref('');
+const arrayFilteredCategories = ref([]);
+let debounceTimeout = null; // Variable para mantener la referencia al timeout
+
+// Observador que reacciona a cambios en inputSearch
+watch(inputSearch, () => {
+    // Si ya hay un temporizador en marcha, lo cancelamos para empezar uno nuevo
+    if (debounceTimeout) {
+        clearTimeout(debounceTimeout);
+    }
+    // Establecemos un nuevo temporizador
+    debounceTimeout = setTimeout(() => {
+        // Si el input de búsqueda está vacío, llama a fetchCategories
+        if (inputSearch.value === '') {
+            resetStatesBeforeFetch()
+            fetchCategories();
+        } else {
+            // De lo contrario, realiza la búsqueda filtrada
+            fetchFilteredCategories();
+        }
+    }, 300); // Retraso de 300 ms
+});
+
+const fetchCategories = async () => {
+    if (isLoading.value || allCategoriesLoaded.value) return;
+    isLoading.value = true; // Resetear estados antes de cada carga
     try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}category/?page=${page.value}`);
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
         
-        const response = await fetch(`${import.meta.env.VITE_API_URL}category`)
+        if (data.length === 0) {
+            allCategoriesLoaded.value = true; // No hay más categorías para cargar
+
+        } else {
+            categories.value = [...categories.value, ...data];
+            page.value++;
+        }
+    } catch (error) {
+        console.error("Error al cargar los items:", error);
+    } finally {
+        isLoading.value = false;
+        setTimeout(() => { flagSpinner.value = false }, 500)
+    }
+};
+
+
+async function fetchFilteredCategories(){
+    flagSpinner.value = true; // Mostrar el spinner de carga
+    if(!inputSearch.value){return}
+    try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}category/filter/?input=${inputSearch.value}`)
         if (!response.ok) {
-            throw new Error('Error en fetch categories')
+            throw new Error('Error en fetch filter');
         }
         categories.value = await response.json();
-        //Para quitar el spinner después de 1 segundo
-        setTimeout(() => {
-            flagSpinner.value = false;
-
-        }, 500);
-
     } catch (error) {
-        flagSpinner.value = false;
-        console.error("Error al obtener categorias", error)
+        console.error('Error al obtener categorías filtradas:', error);
+        // Manejar el error, por ejemplo, mostrando un mensaje al usuario
+    } finally {
+        flagSpinner.value = false; // Ocultar el spinner de carga
     }
 }
+// // Método computado para filtrar los mazos basado en el input del usuario
+// const filteredCategories = computed(() => {
+//     const searchQuery = inputSearch.value.toLowerCase();
+//     return categories.value.filter(category =>
+//         category.name.toLowerCase().includes(searchQuery)
+//     )
+// });
 
 async function fetchUserCategories() {
-//TODO: filtro de categorias creadas x el usuario
     try {
-        
-        const response = await fetch(`${import.meta.env.VITE_API_URL}category/user`,{
+
+        const response = await fetch(`${import.meta.env.VITE_API_URL}category/user`, {
             headers: {
                 'Authorization': 'Bearer ' + userStore.userToken
             }
@@ -117,16 +148,6 @@ async function fetchUserCategories() {
         console.error("Error al obtener categorias", error)
     }
 }
-
-onMounted(() => {
-    flagSpinner.value = true
-    setTimeout(() => {
-        fetchAllCategories();
-
-    }, 200)
-})
-
-//Valor para pasar mediante props a UpdateCategoryComp
 const elementId = ref(0)
 
 function updateElementId(newId) {
@@ -140,11 +161,10 @@ const alertErrorClass = ref("alert alert-success")
 
 const idDeleteElement = ref()
 
-function setDeleteElement(id){
+function setDeleteElement(id) {
     idDeleteElement.value = id
 }
-
-async function deleteElement(){
+async function deleteElement() {
     const id = idDeleteElement.value
     try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}category/${id}`, {
@@ -156,7 +176,7 @@ async function deleteElement(){
             }
         })
 
-        if (!response.ok){
+        if (!response.ok) {
             alertErrorClass.value = "alert alert-danger"
             alertErrorText.value = 'Error al eliminar la categoria';
             alertErrorFlag.value = true;
@@ -175,12 +195,36 @@ async function deleteElement(){
         console.error("Error al borrar la categoria", error);
     }
 }
-
 //Se setean los valores de la categoria para constractarlos en decksview
-function setSelectedCategoryValues(id, creatorId){
+function setSelectedCategoryValues(id, creatorId) {
     deckStore.setSelectedCategoryId(id)
     deckStore.setSelectedCategoryCreatorId(creatorId)
 }
+
+// Nuevo método para manejar el clic en el botón "Comunidad"
+const fetchCommunityButtonFunction = () => {
+    viewType.value = 'comunidad';
+    resetStatesBeforeFetch(); 
+    fetchCategories();
+};
+const fetchCreadasButtonFunction = () => {
+    viewType.value = 'creadas';
+    resetStatesBeforeFetch(); 
+    fetchUserCategories();
+}
+
+// Mejoras en el manejo del botón "Cargar más"
+function loadMoreCategories(){
+    if(viewType.value === 'comunidad') {
+        fetchCategories();
+    } else if(viewType.value === 'creadas') {
+        fetchUserCategories(); 
+    }
+}
+
+onMounted(() => {
+    fetchCommunityButtonFunction();
+});
 
 </script>
 
@@ -194,17 +238,20 @@ function setSelectedCategoryValues(id, creatorId){
                 <div class="d-lg-flex">
                     <ul class="nav flex-lg-row ">
                         <li class="nav-item ">
-                            <button class="nav-link active text-link rounded-4" @click="fetchAllCategories">Comunidad</button>
+                            <button class="nav-link active text-link rounded-4" :class="{ 'active': viewType === 'comunidad' }"
+                                @click="fetchCommunityButtonFunction">Comunidad</button>
                         </li>
                         <li v-if="validToken" class="nav-item">
-                            <button class="nav-link text-link rounded-4 ms-2" @click="fetchUserCategories">Creadas</button>
+                            <button class="nav-link text-link rounded-4 ms-2" :class="{ 'active': viewType === 'creadas' }"
+                                @click="fetchCreadasButtonFunction">Creadas</button>
                         </li>
                     </ul>
                 </div>
             </div>
             <div class="col-lg-4">
                 <div class="d-lg-flex justify-content-end">
-                    <input v-model="inputSearch" class="form-control w-75 inputSearch" type="text" placeholder="Nombre categoria..." />
+                    <input v-model="inputSearch" class="form-control w-75 inputSearch" type="text"
+                        placeholder="Nombre categoria..." />
                 </div>
             </div>
         </div>
@@ -212,15 +259,15 @@ function setSelectedCategoryValues(id, creatorId){
     </div>
 
     <div v-if="validToken" class="d-flex justify-content-start container-fluid my-2">
-            <AddComponent pageName="Categoria" formComponent="AddCategoryComp"/>
-        </div>
+        <AddComponent pageName="Categoria" formComponent="AddCategoryComp" />
+    </div>
 
     <div class="container-fluid mt-4">
 
-        
+
 
         <!-- Contenido mostrado cuando no hay mazos que coincidan con la búsqueda y se ha ingresado algo en el buscador -->
-        <div v-if="filteredCategories.length === 0 && inputSearch.length > 0" class="alert alert-warning" role="alert">
+        <div v-if="categories.length === 0 && inputSearch.length > 0" class="alert alert-warning" role="alert">
             No se han encontrado coincidencias.
         </div>
 
@@ -230,34 +277,26 @@ function setSelectedCategoryValues(id, creatorId){
 
         <div v-else class="d-flex justify-content-between flex-wrap">
 
-            <div v-for="category in filteredCategories"
-            :category="category"
-            @updateElementId="updateElementId"
-            :key="category.id"
-            class="cardBox">
+            <div v-for="category in categories" :category="category" @updateElementId="updateElementId"
+                :key="category.id" class="cardBox">
 
-                <IconCategory style="width: 2rem; height: 2rem; color: var(--main-color)"/>
+                <IconCategory style="width: 2rem; height: 2rem; color: var(--main-color)" />
 
-                <RouterLink :to="`/mazos/${category.id}/${category.name}`" @click="setSelectedCategoryValues(category.id, category.created_by_user_id)" 
-                class="ms-4 text-decoration-none categoryName">{{ convertString(category.name) }}</RouterLink>
+                <RouterLink :to="`/mazos/${category.id}/${category.name}`"
+                    @click="setSelectedCategoryValues(category.id, category.created_by_user_id)"
+                    class="ms-4 text-decoration-none categoryName">{{ convertString(category.name) }}</RouterLink>
 
 
 
                 <div v-if="userId === category.created_by_user_id" class="ms-auto ">
-                    <IconPencil
-                        @click="updateElementId(category.id)"
-                        data-bs-toggle="modal" 
-                        data-bs-target="#updateModal" 
-                        class="me-3 iconLink" 
+                    <IconPencil @click="updateElementId(category.id)" data-bs-toggle="modal"
+                        data-bs-target="#updateModal" class="me-3 iconLink"
                         style="width: 2rem; height: 2rem; color: var(--main-dark-1)" />
 
-                    <UpdateComponent pageName="Categoria" formComponent="UpdateCategoryComp" :elementId="elementId"/>
+                    <UpdateComponent pageName="Categoria" formComponent="UpdateCategoryComp" :elementId="elementId" />
 
-                    <IconDelete
-                        @click="() => setDeleteElement(category.id)"
-                        data-bs-toggle="modal" 
-                        data-bs-target="#deleteModal"
-                        class="iconLink" 
+                    <IconDelete @click="() => setDeleteElement(category.id)" data-bs-toggle="modal"
+                        data-bs-target="#deleteModal" class="iconLink"
                         style="width: 2rem; height: 2rem; color: var(--main-dark-1)" />
                 </div>
             </div>
@@ -269,11 +308,11 @@ function setSelectedCategoryValues(id, creatorId){
 
     </div>
 
-    <div class="pagination-buttons">
-        <button v-if="currentPage > 1" @click="fetchCategories(currentPage - 1)">Anterior</button>
-        <button v-for="page in totalPages" :key="page" @click="fetchCategories(page)">{{ page }}</button>
-        <button v-if="currentPage < totalPages" @click="fetchCategories(currentPage + 1)">Siguiente</button>
-    </div>
+    <button v-if="!allCategoriesLoaded && !flagSpinner && viewType === 'comunidad'" 
+    @click="loadMoreCategories" 
+    class="btn btn-primary d-flex ms-auto"
+
+    >Cargar más</button>
 
     <!-- DELETE MODAL -->
     <!-- Modal -->
@@ -298,8 +337,7 @@ function setSelectedCategoryValues(id, creatorId){
 </template>
 
 <style scoped>
-
-.divAddComp{
+.divAddComp {
     position: relative;
     left: 5rem;
 }
@@ -327,14 +365,12 @@ h1 {
     color: var(--main-color);
 }
 
-.categoryName{
+.categoryName {
     color: var(--text-dark-1);
 }
 
-.categoryName:hover{
+.categoryName:hover {
     color: var(--main-color-light);
     transition: 0.4s;
 }
 </style>
-
-
