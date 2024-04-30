@@ -1,18 +1,17 @@
 <script setup>
-import { ref, onMounted, computed, watch, onUpdated } from 'vue';
-import { useRouter, useRoute, RouterLink } from 'vue-router'
+import { ref, onMounted, computed, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router'
 
-//Servicio
+//Servicios
 import { truncateText } from '../services/viewServices.js';
 
 //Iconos
-import IconCard from '@/components/icons/IconCard.vue';
 import IconDelete from '@/components/icons/IconDelete.vue';
 import IconPencil from '@/components/icons/IconPencil.vue';
 //Componentes
-import AddComponent from '@/components/AddComponent.vue';
-import PlayComponent from '../components/PlayComponent.vue';
-import UpdateComponent from '@/components/UpdateComponent.vue';
+import AddComponent from '@/components/Add/AddComponent.vue';
+import PlayComponent from '@/components/PlayComponent.vue';
+import UpdateComponent from '@/components/Update/UpdateComponent.vue';
 
 //Stores
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -67,6 +66,7 @@ const playMode = ref(false);
 
 function toggleMode() {
     playMode.value = !playMode.value
+    flagStore.toggleFlagPlayMode();
 }
 
 async function fetchDeckCards() {
@@ -169,23 +169,24 @@ async function deleteElement() {
 
 <template>
     <div class="d-flex flex-column container-fluid ">
-        <h1 class="my-4">Cartas</h1>
+        <h1 v-if="!playMode" class="my-4 my-lg-4">Cartas</h1>
+        <h1 v-if="!flagStore.flagMobile" class="my-0 my-lg-4 mx-auto">Modo de juego</h1>
 
         <div class="row mb-4">
-            <div class="d-flex justify-content-between w-100">
+            <div class="d-lg-flex justify-content-lg-between w-100">
 
-                <ul class="nav">
+                <ul class="nav flex-column flex-lg-row">
                     <li v-if="!playMode" class="nav-item">
                         <h3 v-if="deckName">{{ 'Cartas del mazo ' + deckName }}</h3>
                     </li>
-                    <li class="nav-item">
+                    <li v-if="!playMode" class="nav-item">
                         <button @click="goBack" class="goBackButton nav-link">Volver</button>
                     </li>
                 </ul>
-                <button v-if="!playMode" class="btn btn-primary fw-semibold" @click="toggleMode">JUGAR</button>
+                <button v-if="!playMode" class="btn btn-primary fw-semibold mt-3 mt-lg-0" @click="toggleMode">JUGAR</button>
                 <!-- <div class="d-flex justify-content-end mt-0 mt-lg-5"> -->
-                    <button v-if="playMode" class="btn btn-secondary fw-semibold" @click="toggleMode">Ver
-                        cartas</button>
+                    <button v-if="playMode" class="nav-link fw-semibold salirPlayModeButton ms-auto  p-2 px-3" @click="toggleMode">
+                        Salir</button>
                 <!-- </div> -->
             </div>
         </div>
@@ -207,12 +208,13 @@ async function deleteElement() {
         <div v-else class="d-flex justify-content-between flex-wrap">
             <div v-for="card in cards" :key="card.id" class="cardBox ">
 
-                <IconCard style="width: 2rem; height: 2rem; color: var(--main-color)" />
+                <!-- <IconCard style="width: 2rem; height: 2rem; color: var(--main-color)" /> -->
+                <v-icon name="bi-layers"  style="width: 3rem; height: 3rem; color: var(--main-color)" />
 
-                <h4 class="ms-4 cardName my-auto">{{ truncateText(card.front_text, 10) }}
+                <h4 class="ms-4 cardName my-auto">{{ truncateText(card.front_text, 7) }}
                 </h4>
 
-                <div v-if="userId === card.created_by_user_id" class="ms-auto me-3">
+                <div v-if="userId === card.created_by_user_id  || userStore.userRoleRef === 'admin'" class="ms-auto me-3">
                     <IconPencil @click="updateElementId(card.id, card)" data-bs-toggle="modal"
                         data-bs-target="#updateModal" class="me-3 iconLink"
                         style="width: 2rem; height: 2rem; color: var(--main-dark-1)" />
@@ -284,6 +286,15 @@ h1 {
 
 .text-link:active {
     color: var(--main-color);
+}
+
+.salirPlayModeButton{
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+}
+.salirPlayModeButton:hover{
+    color: var(--main-color) !important;
+    
 }
 
 

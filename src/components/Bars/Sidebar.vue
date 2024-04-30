@@ -1,20 +1,18 @@
 <script setup>
 
-import { ref, computed, watch } from 'vue';
+import { computed } from 'vue';
 import { RouterLink } from 'vue-router';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useUserStore } from '@/stores/useUserStore';
-
-import IconMain from './icons/IconMain.vue';
 
 const authStore = useAuthStore();
 const userStore = useUserStore();
 
 const validToken = computed(() => authStore.flagToken);
-
+const admin = computed(() => userStore.userRoleRef)
 // Componentes
-import Login from '../components/Login.vue'
-import Register from '../components/Register.vue'
+import Login from '../Login.vue'
+import Register from '../Register.vue'
 
 function logout() {
   authStore.logout();
@@ -25,10 +23,17 @@ function logout() {
 
 <template>
 
-  <div class="container-fluid d-flex flex-column" style="width: 230px;">
+  <div class="container-fluid d-flex flex-column sidebarBorder rounded mt-3 p-4 ps-0" style="width: 230px;">
 
     <RouterLink to="/" class="d-flex">
-      <IconMain class="iconLink mx-auto my-5" style="width: 4rem; height: 4rem; color: var(--main-color)"/>
+
+      <v-icon label="Main logo" class="iconLink mx-auto my-5" animation="float" speed="slow"
+        style=" width: 5rem; height: 5rem; color: var(--main-color)">
+        
+        <v-icon name="bi-files" scale="3" class="iconLink" />
+      </v-icon>
+
+
     </RouterLink>
 
 
@@ -45,13 +50,16 @@ function logout() {
       <li class="nav-item">
         <RouterLink to="/about" class="nav-link">Sobre nosotros</RouterLink>
       </li>
+      <li v-if="admin === 'admin'" class="nav-item">
+        <RouterLink to="/admin" class="nav-link">Admin</RouterLink>
+      </li>
 
     </ul>
-    
+
     <hr class="my-4 border border-1 bg-secondary separator">
     <RouterLink v-if="validToken" to="/user" class="nav-link username fs-3 mx-auto mb-3 px-3">
-    {{ userStore.usernameRef}}
-  </RouterLink>
+      {{ userStore.usernameRef }}
+    </RouterLink>
 
 
     <button v-if="validToken" class="btn btn-primary mx-2" @click="logout">Salir</button>
@@ -68,7 +76,7 @@ function logout() {
 
         <!-- HEADER -->
         <div class="modal-header">
-          <!-- <h1 class="modal-title fs-5" id="registerModalLabel">Registro</h1> -->
+          
           <nav class="nav">
             <button class="nav-link active navlink" id="login-tab" data-bs-toggle="tab" data-bs-target="#login"
               type="button" role="tab" aria-controls="login" aria-selected="true">
@@ -103,6 +111,17 @@ function logout() {
 </template>
 
 <style scoped>
+.sidebarBorder {
+  /* margin-top: 3rem;
+  margin-bottom: 3rem;
+  height: 90vh;
+  border-right: 2px solid #94a3b83a; */
+  background-color: var(--background-color);
+
+  /* border: 2px solid var(--border-color); */
+  /* box-shadow: 10px 10px 10px var(--background-dark-2); */
+}
+
 .h1Header {
   color: var(--main-color);
   font-size: xx-large;

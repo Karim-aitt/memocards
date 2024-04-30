@@ -45,12 +45,11 @@ export const useUserStore = defineStore('user', () => {
             usernameRef.value = username
             userEmailRef.value = email
             userRoleRef.value = role_name
+            
 
         } catch (error) {
             console.error('Error al obtener usuario', error)
         }
-
-
     }
 
     if (userToken.value !== null) {
@@ -72,6 +71,7 @@ export const useUserStore = defineStore('user', () => {
         userIdRef,
         usernameRef,
         userEmailRef,
+        userRoleRef,
         userToken,
         getUserCredentials,
         resetUser,

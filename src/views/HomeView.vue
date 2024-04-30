@@ -20,7 +20,7 @@ const validToken = computed(() => authStore.flagToken);
 
 <template>
   <main class=" d-flex flex-column">
-    <div class="d-flex flex-column flex-lg-row mb-5">
+    <div class="d-flex flex-column flex-lg-row mb-5 container-fluid">
       <div class="col text-center mb-lg-0 mb-5">
         <h2>
           Recuerda todo lo que quieras sin esfuerzo, a tu gusto.
@@ -36,8 +36,8 @@ const validToken = computed(() => authStore.flagToken);
         Acceder</button>
   
       </div>
-      <div class="col d-flex justify-content-center">
-        <img alt="imagen" />
+      <div class="container-fluid col d-flex justify-content-center ">
+        <img src="@/assets/images/portada.jpg" alt="imagen" class="img-responsive"/>
       </div>
 
     </div>
@@ -81,7 +81,10 @@ const validToken = computed(() => authStore.flagToken);
 </template>
 
 <style scoped>
-
+.img-responsive {
+  max-width: 100%; /* Hace que la imagen sea tan ancha como su contenedor hasta un máximo de su ancho original */
+  height: auto; /* Mantiene la proporción de la imagen al escalar */
+}
 
 </style>
 

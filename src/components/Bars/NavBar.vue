@@ -1,17 +1,17 @@
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { computed, onBeforeMount, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useUserStore } from '@/stores/useUserStore';
-
-import IconMain from './icons/IconMain.vue';
+import { useFlagStore } from '@/stores/useFlagStore';
 
 const authStore = useAuthStore();
 const userStore = useUserStore();
+const flagStore = useFlagStore();
 
 // Componentes
-import Login from '../components/Login.vue'
-import Register from '../components/Register.vue'
+import Login from '../Login.vue'
+import Register from '../Register.vue'
 
 const validToken = computed(() => authStore.flagToken);
 
@@ -20,6 +20,8 @@ function logout() {
   authStore.logout();
   userStore.resetUser();
 }
+
+const admin = computed(() => userStore.userRoleRef)
 
 
 // TODO: Hacer funcion isMobile
@@ -32,8 +34,10 @@ const isMobile = false;
     <div class="container-fluid mx-3">
       <!-- TODO: Insertar icono -->
       <div class="d-inline-flex">
-        <IconMain class="iconLink top-0 start-0 ms-3" style="width: 4rem; height: 4rem; color: var(--main-color)"/>
-        
+
+        <v-icon name="bi-files" scale="3" class="iconLink mx-auto "
+          style=" width: 4rem; height: 4rem; color: var(--main-color)" />
+
       </div>
 
       <RouterLink to="/" class="navbar-brand fw-semibold h1Header mx-auto justify-content-lg-start ms-lg-3">
@@ -59,71 +63,71 @@ const isMobile = false;
           <li class="nav-item">
             <RouterLink to="/about" class="nav-link">Sobre nosotros</RouterLink>
           </li>
+          <li v-if="admin === 'admin'" class="nav-item">
+            <RouterLink to="/admin" class="nav-link">Admin</RouterLink>
+          </li>
           <li v-if="validToken" class="nav-item">
             <RouterLink to="/user" class="nav-link username">{{ userStore.usernameRef }}</RouterLink>
           </li>
+          <li>
+            <div v-if="flagStore.flagMobile">
+              <button v-if="validToken" class="btn btn-primary ms-2 mt-2" @click="logout">Salir</button>
+              <button v-else class="btn btn-primary ms-2 mt-2" data-bs-toggle="modal"
+                data-bs-target="#registerModal">Acceder</button>
+            </div>
+          </li>
         </ul>
       </div>
-      <button v-if="validToken" class="btn btn-primary ms-4" @click="logout">Salir</button>
-      <button v-else class="btn btn-primary ms-4" data-bs-toggle="modal"
-        data-bs-target="#registerModal">Acceder</button>
-
+      <div v-if="!flagStore.flagMobile">
+        <button v-if="validToken" class="btn btn-primary ms-4" @click="logout">Salir</button>
+        <button v-else class="btn btn-primary ms-4" data-bs-toggle="modal"
+          data-bs-target="#registerModal">Acceder</button>
+      </div>
 
     </div>
 
   </nav>
 
-  <hr class="my-3 py-3 border-2 text-secondary separator" />
+  <hr v-if="!flagStore.flagMobile" class="my-3 py-3 border-2 text-secondary separator" />
 
-    <!-- MODAL -->
-<div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
+  <!-- MODAL -->
+  <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
 
-      <!-- HEADER -->
-      <div class="modal-header">
-        <!-- <h1 class="modal-title fs-5" id="registerModalLabel">Registro</h1> -->
-        <nav class="nav">
-          <button class="nav-link active navlink" 
-            id="login-tab" 
-            data-bs-toggle="tab" 
-            data-bs-target="#login" 
-            type="button" role="tab" 
-            aria-controls="login" 
-            aria-selected="true"
-            >
-          Login</button>
+        <!-- HEADER -->
+        <div class="modal-header">
+          <!-- <h1 class="modal-title fs-5" id="registerModalLabel">Registro</h1> -->
+          <nav class="nav">
+            <button class="nav-link active navlink" id="login-tab" data-bs-toggle="tab" data-bs-target="#login"
+              type="button" role="tab" aria-controls="login" aria-selected="true">
+              Login</button>
 
-          <button class="nav-link navlink" 
-            id="register-tab" 
-            data-bs-toggle="tab" 
-            data-bs-target="#register" 
-            type="button" role="tab" 
-            aria-controls="register" 
-            aria-selected="false">
-          Registro</button>
-        </nav>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-
-      <!-- BODY -->
-      <div class="modal-body">
-        <!-- Tab panes -->
-        <div class="tab-content" id="myTabContent">
-
-          <div class="tab-pane fade show active" id="login" role="tabpanel" aria-labelledby="login-tab">
-            <Login />
-          </div>
-
-          <div class="tab-pane fade" id="register" role="tabpanel" aria-labelledby="register-tab">
-            <Register />
-          </div>
+            <button class="nav-link navlink" id="register-tab" data-bs-toggle="tab" data-bs-target="#register"
+              type="button" role="tab" aria-controls="register" aria-selected="false">
+              Registro</button>
+          </nav>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
 
+        <!-- BODY -->
+        <div class="modal-body">
+          <!-- Tab panes -->
+          <div class="tab-content" id="myTabContent">
+
+            <div class="tab-pane fade show active" id="login" role="tabpanel" aria-labelledby="login-tab">
+              <Login />
+            </div>
+
+            <div class="tab-pane fade" id="register" role="tabpanel" aria-labelledby="register-tab">
+              <Register />
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
   </div>
-</div>
 
 </template>
 
@@ -173,20 +177,22 @@ a:focus {
 }
 
 
-.navlink{
+.navlink {
   color: var(--text-dark-1);
   border: 1px solid var(--border-color);
   border-radius: 5px;
 }
-.navlink:last-child{
+
+.navlink:last-child {
   margin-left: 10px;
 }
-.navlink:hover{
+
+.navlink:hover {
   background-color: #6466fa62;
-    transition: 0.4s;
+  transition: 0.4s;
 }
 
-.navlink:focus{
+.navlink:focus {
   color: var(--main-color);
 }
 </style>

@@ -1,16 +1,15 @@
 <script setup>
-import { ref, onMounted, computed, watch, onUnmounted } from 'vue';
-import { RouterView, useRoute, RouterLink } from 'vue-router'
+import { ref, onMounted, computed, watch } from 'vue';
+import { RouterLink } from 'vue-router'
 
-import AddComponent from '@/components/AddComponent.vue';
-import UpdateComponent from '@/components/UpdateComponent.vue';
+import AddComponent from '@/components/Add/AddComponent.vue';
+import UpdateComponent from '@/components/Update/UpdateComponent.vue';
 
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useDeckStore } from '@/stores/useDeckStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { useFlagStore } from '@/stores/useFlagStore';
 
-import IconCategory from '@/components/icons/IconCategory.vue';
 import IconDelete from '@/components/icons/IconDelete.vue';
 import IconPencil from '@/components/icons/IconPencil.vue';
 
@@ -27,6 +26,7 @@ const userId = computed(() => userStore.userIdRef);
 
 // Array con las categorias
 const categories = ref([])
+const numberOfCategories = ref(0);
 const flagSpinner = ref(true);
 
 const page = ref(1);
@@ -37,10 +37,10 @@ const viewType = ref('comunidad');
 
 // Modificamos fetchCategories para resetear estados al cambiar entre vistas
 const resetStatesBeforeFetch = () => {
-  page.value = 1;
-  categories.value = [];
-  allCategoriesLoaded.value = false;
-  flagSpinner.value = true;
+    page.value = 1;
+    categories.value = [];
+    allCategoriesLoaded.value = false;
+    flagSpinner.value = true;
 };
 
 // function loadMoreCategories(){
@@ -84,12 +84,14 @@ const fetchCategories = async () => {
         const response = await fetch(`${import.meta.env.VITE_API_URL}category/?page=${page.value}`);
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
-        
-        if (data.length === 0) {
+
+
+        if (data.categories.length === 0) {
             allCategoriesLoaded.value = true; // No hay más categorías para cargar
 
         } else {
-            categories.value = [...categories.value, ...data];
+            numberOfCategories.value = data.numberOfCategories
+            categories.value = [...categories.value, ...data.categories];
             page.value++;
         }
     } catch (error) {
@@ -101,9 +103,9 @@ const fetchCategories = async () => {
 };
 
 
-async function fetchFilteredCategories(){
+async function fetchFilteredCategories() {
     flagSpinner.value = true; // Mostrar el spinner de carga
-    if(!inputSearch.value){return}
+    if (!inputSearch.value) { return }
     try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}category/filter/?input=${inputSearch.value}`)
         if (!response.ok) {
@@ -204,21 +206,21 @@ function setSelectedCategoryValues(id, creatorId) {
 // Nuevo método para manejar el clic en el botón "Comunidad"
 const fetchCommunityButtonFunction = () => {
     viewType.value = 'comunidad';
-    resetStatesBeforeFetch(); 
+    resetStatesBeforeFetch();
     fetchCategories();
 };
 const fetchCreadasButtonFunction = () => {
     viewType.value = 'creadas';
-    resetStatesBeforeFetch(); 
+    resetStatesBeforeFetch();
     fetchUserCategories();
 }
 
 // Mejoras en el manejo del botón "Cargar más"
-function loadMoreCategories(){
-    if(viewType.value === 'comunidad') {
+function loadMoreCategories() {
+    if (viewType.value === 'comunidad') {
         fetchCategories();
-    } else if(viewType.value === 'creadas') {
-        fetchUserCategories(); 
+    } else if (viewType.value === 'creadas') {
+        fetchUserCategories();
     }
 }
 
@@ -232,25 +234,26 @@ onMounted(() => {
     <div class="d-flex flex-column container-fluid ">
         <h1 class="my-4">Categorias</h1>
 
-
         <div class="row mb-4">
             <div class="col-lg-8">
                 <div class="d-lg-flex">
                     <ul class="nav flex-lg-row ">
                         <li class="nav-item ">
-                            <button class="nav-link active text-link rounded-4" :class="{ 'active': viewType === 'comunidad' }"
+                            <button class="nav-link active text-link rounded-4"
+                                :class="{ 'active': viewType === 'comunidad' }"
                                 @click="fetchCommunityButtonFunction">Comunidad</button>
                         </li>
                         <li v-if="validToken" class="nav-item">
-                            <button class="nav-link text-link rounded-4 ms-2" :class="{ 'active': viewType === 'creadas' }"
-                                @click="fetchCreadasButtonFunction">Creadas</button>
+                            <button class="nav-link text-link rounded-4 ms-2"
+                                :class="{ 'active': viewType === 'creadas' }"
+                                @click="fetchCreadasButtonFunction">Creadas por mi</button>
                         </li>
                     </ul>
                 </div>
             </div>
             <div class="col-lg-4">
                 <div class="d-lg-flex justify-content-end">
-                    <input v-model="inputSearch" class="form-control w-75 inputSearch" type="text"
+                    <input v-model="inputSearch" class="form-control w-75 inputSearch mt-3 mt-lg-0" type="text"
                         placeholder="Nombre categoria..." />
                 </div>
             </div>
@@ -264,7 +267,9 @@ onMounted(() => {
 
     <div class="container-fluid mt-4">
 
-
+        <div v-if="alertErrorFlag" :class="alertErrorClass" role="alert">
+            {{ alertErrorText }}
+        </div>
 
         <!-- Contenido mostrado cuando no hay mazos que coincidan con la búsqueda y se ha ingresado algo en el buscador -->
         <div v-if="categories.length === 0 && inputSearch.length > 0" class="alert alert-warning" role="alert">
@@ -275,44 +280,44 @@ onMounted(() => {
             <span class="visually-hidden">Loading...</span>
         </div>
 
-        <div v-else class="d-flex justify-content-between flex-wrap">
+        <div v-else class="d-lg-flex justify-content-between flex-wrap">
 
             <div v-for="category in categories" :category="category" @updateElementId="updateElementId"
-                :key="category.id" class="cardBox">
+                :key="category.id" class="cardBox position-relative">
 
-                <IconCategory style="width: 2rem; height: 2rem; color: var(--main-color)" />
+                <v-icon name="bi-layers-fill" style="width: 3rem; height: 3rem; color: var(--main-color)" />
 
-                <RouterLink :to="`/mazos/${category.id}/${category.name}`"
-                    @click="setSelectedCategoryValues(category.id, category.created_by_user_id)"
-                    class="ms-4 text-decoration-none categoryName">{{ convertString(category.name) }}</RouterLink>
+                <div class="router-link-container position-absolute top-0 start-0 w-100 h-100">
 
+                    <RouterLink :to="`/mazos/${category.id}/${category.name}`"
+                        @click="setSelectedCategoryValues(category.id, category.created_by_user_id)"
+                        class="text-decoration-none categoryName fs-4 d-flex justify-content-center align-items-center h-100">
+                        {{convertString(category.name) }}
+                    </RouterLink>
+                    
+                </div>
 
-
-                <div v-if="userId === category.created_by_user_id" class="ms-auto ">
-                    <IconPencil @click="updateElementId(category.id)" data-bs-toggle="modal"
+                <div v-if="userId === category.created_by_user_id || userStore.userRoleRef === 'admin'" class="ms-auto icons-container">
+                    <IconPencil @click.stop="updateElementId(category.id)" data-bs-toggle="modal"
                         data-bs-target="#updateModal" class="me-3 iconLink"
-                        style="width: 2rem; height: 2rem; color: var(--main-dark-1)" />
+                        style="width: 2rem; height: 2rem; color: var(--main-dark-1); position: relative; z-index: 2;" />
 
                     <UpdateComponent pageName="Categoria" formComponent="UpdateCategoryComp" :elementId="elementId" />
 
-                    <IconDelete @click="() => setDeleteElement(category.id)" data-bs-toggle="modal"
+                    <IconDelete @click.stop="() => setDeleteElement(category.id)" data-bs-toggle="modal"
                         data-bs-target="#deleteModal" class="iconLink"
-                        style="width: 2rem; height: 2rem; color: var(--main-dark-1)" />
+                        style="width: 2rem; height: 2rem; color: var(--main-dark-1); position: relative; z-index: 2;" />
                 </div>
             </div>
         </div>
-
-        <div v-if="alertErrorFlag" :class="alertErrorClass" role="alert">
-            {{ alertErrorText }}
-        </div>
-
     </div>
 
-    <button v-if="!allCategoriesLoaded && !flagSpinner && viewType === 'comunidad'" 
-    @click="loadMoreCategories" 
-    class="btn btn-primary d-flex ms-auto"
 
-    >Cargar más</button>
+    <button
+        v-if="!allCategoriesLoaded && !flagSpinner && viewType === 'comunidad' && numberOfCategories > categories.length"
+        @click="loadMoreCategories" class="btn btn-primary d-flex ms-auto my-3 mb-5 me-2">
+        Cargar más
+    </button>
 
     <!-- DELETE MODAL -->
     <!-- Modal -->

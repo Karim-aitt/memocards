@@ -10,7 +10,6 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { useFlagStore } from '@/stores/useFlagStore';
 
-let authStore = useAuthStore();
 const userStore = useUserStore();
 let flagStore = useFlagStore();
 
@@ -77,7 +76,6 @@ onMounted(() => {
     authStore = useAuthStore();
     flagStore = useFlagStore();
 
-    // Asegurar que elementValues no sea undefined
     if (props.elementValues) { 
         inputFrontText.value = props.elementValues.front_text || '';
         inputBackText.value = props.elementValues.back_text || '';
@@ -102,13 +100,13 @@ watch(() => props.elementValues, (newValues) => {
         <form class="w-75 mx-auto p-4 m-4" @submit="updateCard">
 
             <div class="mb-3">
-                <label for="updateFrontCardInput" class="form-label">Palabra frontal</label>
-                <input v-model="inputFrontText" type="text" class="form-control" id="updateFrontCardInput" placeholder="Hola" required
+                <label  class="form-label">Palabra frontal</label>
+                <input v-model="inputFrontText" type="text" class="form-control" placeholder="Hola" required
                     maxlength="50" minlength="3">
             </div>
             <div class="mb-3">
-                <label for="updateBackCardInput" class="form-label">Solución</label>
-                <input v-model="inputBackText" type="text" class="form-control" id="updateBackCardInput" placeholder="Hello" required
+                <label  class="form-label">Solución</label>
+                <input v-model="inputBackText" type="text" class="form-control" placeholder="Hello" required
                     maxlength="50" minlength="3">
             </div>
 

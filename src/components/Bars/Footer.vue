@@ -9,13 +9,10 @@ import { RouterLink } from 'vue-router'
     <hr class="my-3 mt-5 py-3 border-2 text-secondary separator">
     <div class="container-fluid mx-3 my-3 py-4">
 
-
-
         <RouterLink to="/" class="navbar-brand fw-semibold h1Footer d-flex justify-content-center">
             Memocards
         </RouterLink>
         <span class="d-flex justify-content-center copyright">2024 ©</span>
-
 
     </div>
 

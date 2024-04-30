@@ -1,18 +1,13 @@
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref } from 'vue';
 import IconDelete from '@/components/icons/IconDelete.vue';
 
 //Stores
-import { useAuthStore } from '@/stores/useAuthStore';
 import { useUserStore } from '@/stores/useUserStore';
-import { useDeckStore } from '@/stores/useDeckStore';
-import { useFlagStore } from '@/stores/useFlagStore';
+
 
 //Referencia de stores
-const deckStore = useDeckStore();
-const authStore = useAuthStore();
 const userStore = useUserStore();
-const flagStore = useFlagStore();
 
 const idDeleteElement = ref()
 

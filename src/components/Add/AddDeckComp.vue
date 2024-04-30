@@ -2,12 +2,10 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router';
 
-import { useAuthStore } from '@/stores/useAuthStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { useFlagStore } from '@/stores/useFlagStore';
 
 const userStore = useUserStore();
-const authStore = useAuthStore();
 const flagStore = useFlagStore();
 
 const route = useRoute();
@@ -66,8 +64,8 @@ async function addDeck(e) {
 
             // Cerrar el modal directamente
             setTimeout(() => {
-                const addModal = bootstrap.Modal.getInstance(document.getElementById('addModal'));
-                addModal.hide();
+                // const addModal = bootstrap.Modal.getInstance(document.getElementById('addModal'));
+                // addModal.hide();
                 flagAlert.value = false;
             }, 2000)
 
@@ -111,6 +109,7 @@ onMounted(() => {
     }
 })
 
+//Vigila si se cambia la ruta
 watch(() => route.path, (newPath) => {
     if(newPath === '/mazos'){
         categoryNameRoute.value = null;

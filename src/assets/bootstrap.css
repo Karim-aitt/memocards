@@ -1,3 +1,5 @@
+/* Botones default de bootstrap modificados */
+
 .btn-primary{
    background-color: var(--main-color); 
    box-shadow: 0 5px 0 var(--main-hover);
@@ -43,3 +45,23 @@
     box-shadow: 0 7px 0 rgb(105, 22, 22);
     transform: translateY(2px);
 }
+
+/* MODAL CLASSES */
+
+.modal-content{
+    background-color: var(--background-dark);
+  }
+  
+  .modal-header, .modal-footer{
+    background-color: var(--background-dark-2);
+    border: none;
+  }
+  
+  .btn-close{
+    filter: brightness(153%) saturate(100%) invert(38%) sepia(35%) saturate(4167%) hue-rotate(227deg) brightness(203%) contrast(101%);
+  
+  }
+  
+  .modal-backdrop{
+    opacity: 0;
+  }

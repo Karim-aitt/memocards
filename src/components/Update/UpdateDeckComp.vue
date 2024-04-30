@@ -9,7 +9,6 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { useFlagStore } from '@/stores/useFlagStore';
 
-let authStore = useAuthStore();
 const userStore = useUserStore();
 let flagStore = useFlagStore();
 
@@ -63,7 +62,6 @@ async function updateDeck(e){
 
             // Cerrar el modal directamente
             setTimeout(() => {
-                //TODO: ERROR a veces no cierra 
                 const updateModal = bootstrap.Modal.getInstance(document.getElementById('updateModal'));
             
                 updateModal.hide();

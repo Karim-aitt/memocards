@@ -10,6 +10,14 @@ export const useFlagStore = defineStore('flag', () => {
     const flagCategory = ref(false);
     const flagDeck = ref(false);
     const flagCard = ref(false);
+    const flagPlayMode = ref(false);
+    const flagMobile = ref(false);
+
+    function toggleFlagMobile(){
+        console.log("antes",flagMobile.value)
+        flagMobile.value = !flagMobile.value
+        console.log("dsp",flagMobile.value)
+    }
 
     function toggleFlagCategory() {
         flagCategory.value = !flagCategory.value;
@@ -23,12 +31,20 @@ export const useFlagStore = defineStore('flag', () => {
         flagCard.value = !flagCard.value;
     }
 
+    function toggleFlagPlayMode(){
+        flagPlayMode.value = !flagPlayMode.value;
+    }
+
     return {
-        toggleFlagCategory,
         flagCategory,
         flagDeck,
         flagCard,
+        flagMobile,
         toggleFlagDeck,
-        toggleFlagCard
+        toggleFlagCard,
+        toggleFlagPlayMode,
+        flagPlayMode,
+        toggleFlagCategory,
+        toggleFlagMobile
     };
 })

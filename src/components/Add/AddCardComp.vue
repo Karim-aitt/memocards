@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref } from 'vue'
 import { useRoute } from 'vue-router';
 
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -7,7 +7,6 @@ import { useUserStore } from '@/stores/useUserStore';
 import { useFlagStore } from '@/stores/useFlagStore';
 
 const userStore = useUserStore();
-const authStore = useAuthStore();
 const flagStore = useFlagStore();
 
 const route = useRoute();

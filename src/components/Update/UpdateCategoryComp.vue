@@ -9,7 +9,6 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { useFlagStore } from '@/stores/useFlagStore';
 
-let authStore = useAuthStore();
 const userStore = useUserStore();
 let flagStore = useFlagStore();
 

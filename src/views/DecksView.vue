@@ -3,10 +3,9 @@ import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter, useRoute, RouterLink } from 'vue-router'
 
 //Componentes
-import AddComponent from '@/components/AddComponent.vue';
-import UpdateComponent from '@/components/UpdateComponent.vue';
+import AddComponent from '@/components/Add/AddComponent.vue';
+import UpdateComponent from '@/components/Update/UpdateComponent.vue';
 //Iconos
-import IconDeck from '@/components/icons/IconDeck.vue';
 import IconDelete from '@/components/icons/IconDelete.vue';
 import IconPencil from '@/components/icons/IconPencil.vue';
 //Stores
@@ -69,7 +68,7 @@ watch(flagDeck, () => {
         }, 500)
     } else {
         setTimeout(() => {
-            fetchAllDecks()
+            fetchUserDecks()
         }, 500)
     }
 });
@@ -157,7 +156,7 @@ onMounted(() => {
     } else {
         setTimeout(() => {
             flagCreator.value = true;
-            fetchAllDecks()
+            fetchUserDecks()
         }, 500)
     }
 })
@@ -243,20 +242,18 @@ function setDeckValues(deckId, created_by_user_id) {
     <div class="d-flex flex-column container-fluid ">
         <h1 class="my-4">Mazos</h1>
         <h3 v-if="categoryName" class="mb-2">Mazos de la categoria <span>{{ categoryName }}</span></h3>
+        <h3 v-if="validToken" class="mb-2">Todos mis mazos</h3>
+        <!-- <h3 v-if="!categoryName" class="mb-2">Todos los mazos</h3> -->
 
         <div class="row mb-4 mt-4">
             <div class="col-lg-8">
                 <div class="d-lg-flex ">
                     <ul class="nav flex-lg-row ">
-                        <li class="nav-item ">
-                            <button class="nav-link active text-link rounded-4"
-                                @click="fetchAllDecks">Comunidad</button>
-                        </li>
                         <li v-if="validToken" class="nav-item">
-                            <button class="nav-link text-link rounded-4 ms-2" @click="fetchUserDecks">Creados</button>
+                            <RouterLink to="/mazos" class="nav-link text-link rounded-4" @click="fetchUserDecks">Creados por mi</RouterLink>
                         </li>
                         <li class="nav-item">
-                            <button @click="goBack" class="goBackButton nav-link">Volver</button>
+                            <button @click="goBack" class="goBackButton mb-2 mb-lg-0 ms-2 ms-lg-0 nav-link">Volver</button>
                         </li>
                     </ul>
                 </div>
@@ -290,8 +287,9 @@ function setDeckValues(deckId, created_by_user_id) {
         <div v-else class="d-flex justify-content-between flex-wrap">
             <div v-for="deck in filteredDecks" :key="deck.id" class="cardBox">
 
-                <IconDeck style="width: 2rem; height: 2rem; color: var(--main-color)" />
-                <strong class="mx-3">{{ deck.category_name }}</strong>
+                
+                <v-icon name="bi-layers-half"  style="width: 3rem; height: 3rem; color: var(--main-color)" />
+                <strong v-if="!flagStore.flagMobile" class="mx-3">{{ deck.category_name }}</strong>
                 <div class="d-flex flex-column">
 
 
@@ -303,14 +301,14 @@ function setDeckValues(deckId, created_by_user_id) {
                     </RouterLink>
 
                     <div class="ms-2 tagDiv">
-                        <span v-for="tag in deck.tag_names" @click="filterByTag(tag)" style="cursor: pointer">{{ tag }}</span>
+                        <span v-for="tag in deck.tag_names" @click="filterByTag(tag)" class="tagStyle">{{ tag }}</span>
                     </div>
 
                 </div>
 
 
 
-                <div v-if="userId === deck.created_by_user_id" class="ms-auto">
+                <div v-if="userId === deck.created_by_user_id || userStore.userRoleRef === 'admin'" class="ms-auto">
                     <IconPencil @click="updateElementId(deck.id)" data-bs-toggle="modal" data-bs-target="#updateModal"
                         class="me-3 iconLink" style="width: 2rem; height: 2rem; color: var(--main-dark-1)" />
 
@@ -391,5 +389,12 @@ h1 {
 .deckName:hover {
     color: var(--main-color-light);
     transition: 0.4s;
+}
+
+.tagStyle{
+    cursor: pointer;
+}
+.tagStyle:hover{
+    color: var(--main-color);
 }
 </style>

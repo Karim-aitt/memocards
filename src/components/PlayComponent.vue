@@ -4,12 +4,15 @@ import { truncateText } from '../services/viewServices.js';
 
 import IconFlip from "./icons/IconFlip.vue"
 
-import { ref, onMounted, computed } from 'vue';
+import { ref, computed } from 'vue';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useFlagStore } from '@/stores/useFlagStore';
 
 const props = defineProps({
     cards: Array,
 })
+
+const flagStore = useFlagStore();
 
 const arrayCards = ref([...props.cards]);
 
@@ -88,15 +91,15 @@ function checkAnswer() {
         flagSuccess.value = false;
         classInputAnswer.value = 'form-control is-invalid inputAnswer';
         classBodyCardAnimated.value = 'cardBody d-flex flex-column border border-4 border-danger border-secondary rounded p-3 text-center mx-auto animate__animated animate__wobble'
-        
+
         setTimeout(() => {
             classBodyCardAnimated.value = 'cardBody d-flex flex-column border border-1 border-secondary rounded p-3 text-center mx-auto'
         }, 1000)
 
         setTimeout(() => {
             removeWrongCard(cardIndexToShow.value);
-            
-            
+
+
             inputUserAnswer.value = '';
             inputAnswerRef.value.focus()
             classInputAnswer.value = 'form-control inputAnswer';
@@ -112,16 +115,16 @@ const correctCards = ref([]);
 const wrongCards = ref([]);
 
 function removeCorrectCard(index) {
-    
+
     correctCards.value.push(arrayCards.value.splice(index, 1)[0]);
     longitudMazo.value--;
-}   
+}
 
 function removeWrongCard(index) {
-    
+
     wrongCards.value.push(arrayCards.value.splice(index, 1)[0]);
     longitudMazo.value--;
-    
+
 }
 
 function resetCards() {
@@ -147,19 +150,24 @@ const allCardsCompleted = computed(() => {
 </script>
 
 <template>
-    <!-- <hr class="mt-5 py-3 border-2 text-secondary separator"> -->
+    
 
-    <div class="text-center mb-4">
-        <p class="w-50 mx-auto fs-3" v-if="allCardsCompleted">Has completado todas las cartas. </p>
-        <h3 v-else> Cartas restantes: {{ longitudMazo + 1 }}</h3>
-        <p class="w-50 mx-auto fs-2" v-if="allCardsCompleted && wrongCards.length > 0">¿Quieres repetir las falladas?
+    <div class="text-center mb-2 mb-lg-4">
+        <p class="w-lg-50 w-100 mx-auto fs-3" v-if="allCardsCompleted">Has completado todas las cartas. </p>
+
+        <div v-else class="d-flex justify-content-center">
+            <h2 > Cartas restantes: {{ longitudMazo + 1 }}</h2>
+            
+        </div>
+
+        <p class="w-lg-50 w-100 mx-auto fs-2" v-if="allCardsCompleted && wrongCards.length > 0">¿Quieres repetir las falladas?
         </p>
         <button @click="repeatWrongCards" class="btn btn-primary"
             v-if="allCardsCompleted && wrongCards.length > 0">Repetir falladas</button>
 
 
     </div>
-    <div v-if="!allCardsCompleted" class="container-fluid mt-2 ">
+    <div v-if="!allCardsCompleted" class="container-fluid mt-0 mt-lg-2 ">
 
 
         <div :class="classBodyCardAnimated">
@@ -183,35 +191,55 @@ const allCardsCompleted = computed(() => {
 
     <div v-if="!allCardsCompleted" class="container-fluid mt-3 d-flex justify-content-evenly align-items-center">
 
-        <div class="mt-5 d-flex">
+        <div class="d-lg-flex mt-lg-4">
             <!-- BUTTON DERECHA -->
-            <button class="btn btn-secondary fw-bold me-5" @click="restarIndice">
+            <button v-if="!flagStore.flagMobile" class="btn btn-secondary fw-bold me-5" @click="restarIndice">
                 < 
             </button>
 
             <!-- USER INPUT Y BUTTON DE CHECK -->
-            <input ref="inputAnswerRef" v-model="inputUserAnswer" type="text" placeholder="Respuesta"
-                :class="classInputAnswer" />
-            <button class="ms-3 btn btn-primary" @click="checkAnswer(cardIndexToShow)">Comprobar</button>
+            <div class="d-flex flex-column flex-lg-row justify-content-center justify-content-lg-evenly">
+                
+                <input ref="inputAnswerRef" v-model="inputUserAnswer" type="text" placeholder="Respuesta"
+                    :class="classInputAnswer" class="p-3 p-lg-2" />
+                
+                    <button class="ms-lg-3 my-3 py-3 py-lg-0 my-lg-0 btn btn-primary" @click="checkAnswer(cardIndexToShow)">Comprobar</button>
 
-            <!-- BUTTON i<quierda -->
-            <button class="btn btn-secondary fw-bold ms-5" @click="sumarIndice">
+            </div>
+
+            <!-- BUTTON iZQUIERDA -->
+            <button v-if="!flagStore.flagMobile" class="btn btn-secondary fw-bold ms-5" @click="sumarIndice">
                 >
             </button>
 
+            <!-- MOBILE VERSION DIV -->
+            <div v-if="flagStore.flagMobile" class="mt-3 d-flex justify-content-between">
+                <!-- BUTTON DERECHA -->
+                <button  class="btn btn-secondary fw-bold p-3"
+                    @click="restarIndice">
+                    < 
+                </button>
 
+                <!-- BUTTON RESET -->
+                <button class="btn btn-danger" @click="resetCards">Reset</button>
+
+                <!-- BUTTON i<quierda -->
+                <button class="btn btn-secondary fw-bold p-3"
+                    @click="sumarIndice">
+                    >
+                </button>
+            </div>
         </div>
-
     </div>
 
-    <div v-if="!allCardsCompleted"
+    <div v-if="!allCardsCompleted && !flagStore.flagMobile"
         class="d-flex border border-2 rounded  p-4 mt-5 mx-auto flex-wrap w-75 divCorrectCards">
         <div v-for="card in wrongCards" class="p-3 border border-3 rounded correctCard me-2 my-2 fw-semibold">
             {{ truncateText(card.front_text, 3) }}
         </div>
     </div>
 
-    <div class="mt-4 d-flex justify-content-end mt-5 ">
+    <div v-if="!flagStore.flagMobile" class="mt-4 d-flex justify-content-end mt-5 ">
         <button class="btn btn-secondary me-3" @click="resetCards">Reset</button>
 
     </div>
@@ -225,7 +253,7 @@ const allCardsCompleted = computed(() => {
     border-color: var(--border-color) !important;
 }
 
-.correctBorder{
+.correctBorder {
     border: 10px solid green !important;
     border-radius: 15px !important;
 }
@@ -243,6 +271,13 @@ const allCardsCompleted = computed(() => {
     background-color: var(--text-dark-1);
     color: var(--text-light-1);
     box-shadow: 10px 10px 0 var(--text-light-1);
+}
+
+@media (max-width: 992px) {
+    .cardBody {
+        height: 150px;
+        box-shadow: none;
+    }
 }
 
 .inputAnswer {
