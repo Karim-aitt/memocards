@@ -11,6 +11,7 @@ import { useUserStore } from '@/stores/useUserStore';
 import { useFlagStore } from '@/stores/useFlagStore';
 
 const userStore = useUserStore();
+let authStore = useAuthStore();
 let flagStore = useFlagStore();
 
 //Valores para el formulario

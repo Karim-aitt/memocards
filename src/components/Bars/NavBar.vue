@@ -23,28 +23,32 @@ function logout() {
 
 const admin = computed(() => userStore.userRoleRef)
 
-
-// TODO: Hacer funcion isMobile
-const isMobile = false;
+const isMobile = computed(() => flagStore.flagMobile);
 
 </script>
 
 <template>
   <nav class="navbar navbar-expand-lg py-lg-5 ">
-    <div class="container-fluid mx-3">
+    <div class="container-fluid mx-lg-3">
       <!-- TODO: Insertar icono -->
       <div class="d-inline-flex">
 
-        <v-icon name="bi-files" scale="3" class="iconLink mx-auto "
+        <v-icon v-if="isMobile" name="bi-files" scale="3" class="iconLink"
+          style=" width: 3rem; height: 3rem; color: var(--main-color)" />
+
+        <v-icon v-else name="bi-files" scale="3" class="iconLink"
           style=" width: 4rem; height: 4rem; color: var(--main-color)" />
 
       </div>
 
-      <RouterLink to="/" class="navbar-brand fw-semibold h1Header mx-auto justify-content-lg-start ms-lg-3">
+      <RouterLink v-if="isMobile" to="/" class="navbar-brand h1HeaderMobile mx-auto justify-content-lg-start ms-lg-3">
+        Memocards
+      </RouterLink>
+      <RouterLink v-else to="/" class="navbar-brand fw-semibold h1Header mx-auto justify-content-lg-start ms-lg-3">
         Memocards
       </RouterLink>
 
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+      <button class="navbar-toggler " type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
         aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -139,6 +143,14 @@ nav {
 .h1Header {
   color: var(--main-color);
   font-size: xx-large;
+  font-family: "Madimi One", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.h1HeaderMobile {
+  color: var(--main-color);
+  font-size:x-large;
   font-family: "Madimi One", sans-serif;
   font-weight: 400;
   font-style: normal;

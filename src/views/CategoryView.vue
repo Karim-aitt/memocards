@@ -23,6 +23,7 @@ import { convertString } from '@/services/viewServices';
 
 const validToken = computed(() => authStore.flagToken);
 const userId = computed(() => userStore.userIdRef);
+const isMobile = computed(() => flagStore.flagMobile);
 
 // Array con las categorias
 const categories = ref([])
@@ -34,6 +35,7 @@ const isLoading = ref(false);
 const allCategoriesLoaded = ref(false);
 
 const viewType = ref('comunidad');
+
 
 // Modificamos fetchCategories para resetear estados al cambiar entre vistas
 const resetStatesBeforeFetch = () => {
@@ -285,9 +287,10 @@ onMounted(() => {
             <div v-for="category in categories" :category="category" @updateElementId="updateElementId"
                 :key="category.id" class="cardBox position-relative">
 
-                <v-icon name="bi-layers-fill" style="width: 3rem; height: 3rem; color: var(--main-color)" />
+                <v-icon v-if="isMobile" disabled ></v-icon>
+                <v-icon v-else name="bi-layers-fill" style="width: 3rem; height: 3rem; color: var(--main-color)" />
 
-                <div class="router-link-container position-absolute top-0 start-0 w-100 h-100">
+                <div v-if="isMobile" class="router-link-container ">
 
                     <RouterLink :to="`/mazos/${category.id}/${category.name}`"
                         @click="setSelectedCategoryValues(category.id, category.created_by_user_id)"
@@ -295,6 +298,15 @@ onMounted(() => {
                         {{convertString(category.name) }}
                     </RouterLink>
                     
+                </div>
+                <div v-else class="router-link-container position-absolute top-0 start-0 w-100 h-100">
+
+                    <RouterLink :to="`/mazos/${category.id}/${category.name}`"
+                        @click="setSelectedCategoryValues(category.id, category.created_by_user_id)"
+                        class="text-decoration-none categoryName fs-4 d-flex justify-content-center align-items-center h-100">
+                        {{convertString(category.name) }}
+                    </RouterLink>
+
                 </div>
 
                 <div v-if="userId === category.created_by_user_id || userStore.userRoleRef === 'admin'" class="ms-auto icons-container">

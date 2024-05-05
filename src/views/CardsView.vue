@@ -25,6 +25,8 @@ const authStore = useAuthStore();
 const userStore = useUserStore();
 const flagStore = useFlagStore();
 
+const isMobile = computed(() => flagStore.flagMobile);
+
 //Flag para el refresco de cartas
 const flagCard = computed(() => flagStore.flagCard);
 //Refrescar las cartas al añadir una nueva
@@ -170,7 +172,7 @@ async function deleteElement() {
 <template>
     <div class="d-flex flex-column container-fluid ">
         <h1 v-if="!playMode" class="my-4 my-lg-4">Cartas</h1>
-        <h1 v-if="!flagStore.flagMobile" class="my-0 my-lg-4 mx-auto">Modo de juego</h1>
+        <h1 v-if="!isMobile && playMode" class="my-0 my-lg-4 mx-auto">Modo de juego</h1>
 
         <div class="row mb-4">
             <div class="d-lg-flex justify-content-lg-between w-100">
@@ -185,7 +187,7 @@ async function deleteElement() {
                 </ul>
                 <button v-if="!playMode" class="btn btn-primary fw-semibold mt-3 mt-lg-0" @click="toggleMode">JUGAR</button>
                 <!-- <div class="d-flex justify-content-end mt-0 mt-lg-5"> -->
-                    <button v-if="playMode" class="nav-link fw-semibold salirPlayModeButton ms-auto  p-2 px-3" @click="toggleMode">
+                    <button v-if="playMode" class="nav-link fw-semibold salirPlayModeButton ms-auto  p-2 px-3 mt-3 mt-lg-0" @click="toggleMode">
                         Salir</button>
                 <!-- </div> -->
             </div>
@@ -209,7 +211,7 @@ async function deleteElement() {
             <div v-for="card in cards" :key="card.id" class="cardBox ">
 
                 <!-- <IconCard style="width: 2rem; height: 2rem; color: var(--main-color)" /> -->
-                <v-icon name="bi-layers"  style="width: 3rem; height: 3rem; color: var(--main-color)" />
+                <v-icon v-if="!isMobile" name="bi-layers"  style="width: 3rem; height: 3rem; color: var(--main-color)" />
 
                 <h4 class="ms-4 cardName my-auto">{{ truncateText(card.front_text, 7) }}
                 </h4>

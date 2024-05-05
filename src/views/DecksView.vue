@@ -8,6 +8,8 @@ import UpdateComponent from '@/components/Update/UpdateComponent.vue';
 //Iconos
 import IconDelete from '@/components/icons/IconDelete.vue';
 import IconPencil from '@/components/icons/IconPencil.vue';
+//Services
+import { truncateText } from '@/services/viewServices';
 //Stores
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useUserStore } from '@/stores/useUserStore';
@@ -18,6 +20,8 @@ const deckStore = useDeckStore();
 const authStore = useAuthStore();
 const userStore = useUserStore();
 const flagStore = useFlagStore();
+
+const isMobile = computed(() => flagStore.flagMobile);
 
 //Array de mazos
 const decks = ref([]);
@@ -143,10 +147,10 @@ onMounted(() => {
 
     if (categoryId) {
         if (categoryCreatorId === userId.value) {
-            
+
             flagCreator.value = true;
         } else {
-            
+
             flagCreator.value = false;
         }
 
@@ -206,10 +210,10 @@ async function deleteElement() {
 
             if (categoryId) {
                 if (categoryCreatorId === userId.value) {
-                    
+
                     flagCreator.value = true;
                 } else {
-                    
+
                     flagCreator.value = false;
                 }
 
@@ -242,7 +246,7 @@ function setDeckValues(deckId, created_by_user_id) {
     <div class="d-flex flex-column container-fluid ">
         <h1 class="my-4">Mazos</h1>
         <h3 v-if="categoryName" class="mb-2">Mazos de la categoria <span>{{ categoryName }}</span></h3>
-        <h3 v-if="validToken" class="mb-2">Todos mis mazos</h3>
+        <h3 v-if="validToken && !categoryName" class="mb-2">Todos mis mazos</h3>
         <!-- <h3 v-if="!categoryName" class="mb-2">Todos los mazos</h3> -->
 
         <div class="row mb-4 mt-4">
@@ -250,17 +254,19 @@ function setDeckValues(deckId, created_by_user_id) {
                 <div class="d-lg-flex ">
                     <ul class="nav flex-lg-row ">
                         <li v-if="validToken" class="nav-item">
-                            <RouterLink to="/mazos" class="nav-link text-link rounded-4" @click="fetchUserDecks">Creados por mi</RouterLink>
+                            <RouterLink to="/mazos" class="nav-link text-link rounded-4" @click="fetchUserDecks">Creados
+                                por mi</RouterLink>
                         </li>
                         <li class="nav-item">
-                            <button @click="goBack" class="goBackButton mb-2 mb-lg-0 ms-2 ms-lg-0 nav-link">Volver</button>
+                            <button @click="goBack"
+                                class="goBackButton mb-2 mb-lg-0 ms-lg-0 ms-2 nav-link">Volver</button>
                         </li>
                     </ul>
                 </div>
             </div>
             <div class="col-lg-4">
                 <!-- BUSCADOR -->
-                <div class="d-lg-flex justify-content-end">
+                <div class="d-lg-flex justify-content-end mt-3 mt-lg-0">
                     <input v-model="inputSearch" class="form-control w-75 inputSearch" type="text"
                         placeholder="Nombre/etiquetas..." />
                 </div>
@@ -287,21 +293,39 @@ function setDeckValues(deckId, created_by_user_id) {
         <div v-else class="d-flex justify-content-between flex-wrap">
             <div v-for="deck in filteredDecks" :key="deck.id" class="cardBox">
 
-                
-                <v-icon name="bi-layers-half"  style="width: 3rem; height: 3rem; color: var(--main-color)" />
-                <strong v-if="!flagStore.flagMobile" class="mx-3">{{ deck.category_name }}</strong>
-                <div class="d-flex flex-column">
 
+                <v-icon v-if="!isMobile" name="bi-layers-half"
+                    style="width: 3rem; height: 3rem; color: var(--main-color)" />
 
+                <strong v-if="!isMobile" class="mx-3">{{ deck.category_name }}</strong>
+
+                <div v-if="isMobile" class="d-flex flex-column">
 
                     <RouterLink :to="`/cards/${deck.id}/${deck.name}`"
                         @click="setDeckValues(deck.id, deck.created_by_user_id)"
                         class="ms-2 text-decoration-none deckName ">
-                        {{ convertString(deck.name) }}
+                        {{ truncateText(convertString(deck.name), 10) }}
                     </RouterLink>
 
                     <div class="ms-2 tagDiv">
-                        <span v-for="tag in deck.tag_names" @click="filterByTag(tag)" class="tagStyle">{{ tag }}</span>
+                        <span v-for="tag in deck.tag_names.slice(0, 2)" @click="filterByTag(tag)" class="tagStyleMobile">{{
+                            truncateText(tag, 7) }}</span>
+                    </div>
+
+                </div>
+                <div v-else class="d-flex flex-column">
+
+                    <RouterLink :to="`/cards/${deck.id}/${deck.name}`"
+                        @click="setDeckValues(deck.id, deck.created_by_user_id)"
+                        class="ms-2 text-decoration-none deckName ">
+                        {{ truncateText(convertString(deck.name), 18) }}
+                    </RouterLink>
+
+                    <div class="ms-2 tagDiv">
+
+                        <span v-for="(tag, index) in deck.tag_names.slice(0, 3)" :key="index" @click="filterByTag(tag)"
+                            class="tagStyle">{{ truncateText(tag, 7) }}</span>
+
                     </div>
 
                 </div>
@@ -391,10 +415,20 @@ h1 {
     transition: 0.4s;
 }
 
-.tagStyle{
+.tagStyle {
     cursor: pointer;
 }
-.tagStyle:hover{
+
+.tagStyle:hover {
     color: var(--main-color);
 }
+
+.tagStyleMobile{
+    font-size: 13px;
+    cursor: pointer;
+}
+.tagStyleMobile:hover{
+    color: var(--main-color);
+}
+
 </style>

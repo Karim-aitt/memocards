@@ -239,7 +239,7 @@ const allCardsCompleted = computed(() => {
         </div>
     </div>
 
-    <div v-if="!flagStore.flagMobile" class="mt-4 d-flex justify-content-end mt-5 ">
+    <div v-if="!flagStore.flagMobile" class="mt-4 d-flex justify-content-end">
         <button class="btn btn-secondary me-3" @click="resetCards">Reset</button>
 
     </div>
@@ -276,6 +276,8 @@ const allCardsCompleted = computed(() => {
 @media (max-width: 992px) {
     .cardBody {
         height: 150px;
+        min-width: 100px;
+        max-width: 250px;
         box-shadow: none;
     }
 }

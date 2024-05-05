@@ -106,7 +106,10 @@ h3 span{
 @media (max-width: 992px) {
   .cardBox{
     width: 100%;
+    height: 70px;
     margin: 5px;
+    margin-top: 15px;
+    
   }
 }
 
