@@ -31,6 +31,10 @@ body{
   
 }
 
+.textColor{
+  color: var(--main-color);
+}
+
 /* Bordes de cajas */
 .borderColor{
   border: 2px solid var(--border-color) !important;

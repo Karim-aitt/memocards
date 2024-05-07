@@ -101,10 +101,10 @@ async function fetchDeckCards() {
 onMounted(() => {
 
     if (creatorId === userId.value) {
-        
+
         flagCreator.value = true;
     } else {
-        
+
         flagCreator.value = false;
     }
 
@@ -185,12 +185,18 @@ async function deleteElement() {
                         <button @click="goBack" class="goBackButton nav-link">Volver</button>
                     </li>
                 </ul>
-                <button v-if="!playMode" class="btn btn-primary fw-semibold mt-3 mt-lg-0" @click="toggleMode">JUGAR</button>
-                <!-- <div class="d-flex justify-content-end mt-0 mt-lg-5"> -->
-                    <button v-if="playMode" class="nav-link fw-semibold salirPlayModeButton ms-auto  p-2 px-3 mt-3 mt-lg-0" @click="toggleMode">
-                        Salir</button>
-                <!-- </div> -->
+
+                <button v-if="!playMode && !isMobile" class="btn btn-primary fw-semibold mt-3 mt-lg-0"
+                    @click="toggleMode">MEMORIZAR</button>
+
+                <button v-if="playMode" class="nav-link fw-semibold salirPlayModeButton ms-auto p-2 px-3 mt-3 mt-lg-0"
+                    @click="toggleMode">
+                    Salir</button>
+
             </div>
+
+
+
         </div>
 
 
@@ -199,9 +205,11 @@ async function deleteElement() {
         </div>
 
 
+        <button v-if="!playMode && isMobile" class="btn btn-primary fw-semibold my-1 py-3 mx-1"@click="toggleMode">MEMORIZAR</button>
     </div>
 
-    <div v-if="!playMode" class="container-fluid mt-5">
+
+    <div v-if="!playMode" class="container-fluid mt-1 mt-lg-5">
 
         <div v-if="flagSpinner" class="spinner-border mx-auto fs-2" role="status">
             <span class="visually-hidden">Loading...</span>
@@ -211,14 +219,21 @@ async function deleteElement() {
             <div v-for="card in cards" :key="card.id" class="cardBox ">
 
                 <!-- <IconCard style="width: 2rem; height: 2rem; color: var(--main-color)" /> -->
-                <v-icon v-if="!isMobile" name="bi-layers"  style="width: 3rem; height: 3rem; color: var(--main-color)" />
+                <v-icon v-if="!isMobile" name="bi-layers" style="width: 3rem; height: 3rem; color: var(--main-color)" />
 
-                <h4 class="ms-4 cardName my-auto">{{ truncateText(card.front_text, 7) }}
-                </h4>
+                <p class="ms-lg-3 fs-5 my-auto">{{ truncateText(card.front_text, 7) }}
+                </p>
 
-                <div v-if="userId === card.created_by_user_id  || userStore.userRoleRef === 'admin'" class="ms-auto me-3">
+                <p v-if="isMobile && card.back_text.length > 6" class="ms-1 ms-lg-4 fs-5 my-auto ">/ <span
+                        class="textColor">...</span></p>
+                <p v-else class="ms-2 ms-lg-2 fs-5 my-auto">/ <span class="textColor">{{ truncateText(card.back_text, 5)
+                        }}</span>
+                </p>
+
+                <div v-if="userId === card.created_by_user_id || userStore.userRoleRef === 'admin'"
+                    class="ms-auto me-lg-3">
                     <IconPencil @click="updateElementId(card.id, card)" data-bs-toggle="modal"
-                        data-bs-target="#updateModal" class="me-3 iconLink"
+                        data-bs-target="#updateModal" class="me-lg-3 me-2 iconLink"
                         style="width: 2rem; height: 2rem; color: var(--main-dark-1)" />
 
                     <UpdateComponent pageName="Carta" formComponent="UpdateCardComp" :elementId="elementId"
@@ -243,7 +258,7 @@ async function deleteElement() {
     </div>
     <PlayComponent v-else :cards="cards" />
 
-
+    <hr v-if="!playMode">
 
     <!-- DELETE MODAL -->
     <!-- Modal -->
@@ -290,14 +305,13 @@ h1 {
     color: var(--main-color);
 }
 
-.salirPlayModeButton{
+.salirPlayModeButton {
     border: 1px solid var(--border-color);
     border-radius: 5px;
 }
-.salirPlayModeButton:hover{
+
+.salirPlayModeButton:hover {
     color: var(--main-color) !important;
-    
+
 }
-
-
 </style>

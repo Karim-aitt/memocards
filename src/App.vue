@@ -65,7 +65,7 @@ window.addEventListener('resize', handleResize);
     
     <div class="container-fluid m-lg-3">
       <RouterView />
-      <Footer />
+      
     </div>
   </div>
 </template>

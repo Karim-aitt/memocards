@@ -198,7 +198,7 @@ const allCardsCompleted = computed(() => {
             </button>
 
             <!-- USER INPUT Y BUTTON DE CHECK -->
-            <div class="d-flex flex-column flex-lg-row justify-content-center justify-content-lg-evenly">
+            <div v-if="!flagStore.flagMobile" class="d-flex flex-column flex-lg-row justify-content-center justify-content-lg-evenly">
                 
                 <input ref="inputAnswerRef" v-model="inputUserAnswer" type="text" placeholder="Respuesta"
                     :class="classInputAnswer" class="p-3 p-lg-2" />
@@ -213,7 +213,7 @@ const allCardsCompleted = computed(() => {
             </button>
 
             <!-- MOBILE VERSION DIV -->
-            <div v-if="flagStore.flagMobile" class="mt-3 d-flex justify-content-between">
+            <div v-if="flagStore.flagMobile" class="mt-1 d-flex justify-content-between">
                 <!-- BUTTON DERECHA -->
                 <button  class="btn btn-secondary fw-bold p-3"
                     @click="restarIndice">
@@ -228,7 +228,19 @@ const allCardsCompleted = computed(() => {
                     @click="sumarIndice">
                     >
                 </button>
+
+                
             </div>
+
+            <div v-if="flagStore.flagMobile" class="d-flex flex-column flex-lg-row justify-content-center justify-content-lg-evenly mt-4">
+                
+                <input ref="inputAnswerRef" v-model="inputUserAnswer" type="text" placeholder="Respuesta"
+                :class="classInputAnswer" class="p-3 p-lg-2" />
+            
+                <button class="ms-lg-3 my-3 py-3 py-lg-0 my-lg-0 btn btn-primary" @click="checkAnswer(cardIndexToShow)">Comprobar</button>
+
+            </div>
+
         </div>
     </div>
 
