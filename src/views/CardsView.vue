@@ -200,7 +200,7 @@ async function deleteElement() {
         </div>
 
 
-        <div v-if="validToken && flagCreator && !playMode" class="">
+        <div v-if="validToken && flagCreator && !playMode" class="mb-3 mb-lg-0">
             <AddComponent pageName="Carta" formComponent="AddCardComp" />
         </div>
 
@@ -221,12 +221,12 @@ async function deleteElement() {
                 <!-- <IconCard style="width: 2rem; height: 2rem; color: var(--main-color)" /> -->
                 <v-icon v-if="!isMobile" name="bi-layers" style="width: 3rem; height: 3rem; color: var(--main-color)" />
 
-                <p class="ms-lg-3 fs-5 my-auto">{{ truncateText(card.front_text, 7) }}
+                <p class="ms-lg-3 fs-5 my-auto text-nowrap">{{ truncateText(card.front_text, 7) }}
                 </p>
 
-                <p v-if="isMobile && card.back_text.length > 6" class="ms-1 ms-lg-4 fs-5 my-auto ">/ <span
+                <p v-if="isMobile && card.back_text.length > 4" class="ms-1 ms-lg-4 fs-5 my-auto text-nowrap">⇒ <span
                         class="textColor">...</span></p>
-                <p v-else class="ms-2 ms-lg-2 fs-5 my-auto">/ <span class="textColor">{{ truncateText(card.back_text, 5)
+                <p v-else class="ms-2 ms-lg-2 fs-5 my-auto text-nowrap">⇒ <span class="textColor">{{ truncateText(card.back_text, 7)
                         }}</span>
                 </p>
 

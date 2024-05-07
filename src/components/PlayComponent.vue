@@ -287,7 +287,7 @@ const allCardsCompleted = computed(() => {
 
 @media (max-width: 992px) {
     .cardBody {
-        height: 150px;
+        height: auto;
         min-width: 100px;
         max-width: 250px;
         box-shadow: none;
